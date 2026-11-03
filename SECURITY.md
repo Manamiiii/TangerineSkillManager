@@ -20,3 +20,5 @@ Use GitHub private vulnerability reporting from the repository Security tab if t
 - Skill updates require a single-use, expiring snapshot preview. Applying a preview does not fetch newer unreviewed content. Copy installations remain unchanged until synchronization; symlink/junction installations immediately reference the updated library. No application binary is automatically downloaded or executed.
 
 Before a public release, maintainers should review current dependencies, sign and notarize distributions as appropriate, and run the native-platform CI and desktop acceptance tests. Signing credentials belong in secret storage, never in configuration examples or source.
+
+The dated [build dependency review](docs/DEPENDENCY_REVIEW.md) records outstanding development-tool advisories, their scope, current constraints and upgrade requirements. A zero production-dependency audit does not mean all dependencies or the desktop runtime are vulnerability-free.
