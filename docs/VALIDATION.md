@@ -10,7 +10,11 @@
 
 正式 Setup：0.1.0，123,802,132 bytes，SHA-256 `313f96f445a3968a635d224733cf634afaab4b0f493e2a42f61ace885518cd8a`。Portable：112,067,590 bytes，SHA-256 `425c06c48fde68a556dc5e248f7a4b47408dff3fbbd67c6966efe55e18ae7ff5`。文件均在 `release/`，附 `SHA256SUMS.txt`，未签名、未发布。历史记录中的 hash 只对应历史文件。
 
-本轮 CI 新增正式打包 EXE 检查，并移除自动产物上传；不创建 Release。远程结果在推送后单独记录，尚不能用以上本机结果推断。未验证：正式身份安装器的完整交互向导、干净 Windows 普通账号、真实历史业务迁移、macOS 实机安装。低版本 fixture 与当前版本使用同一源码，仅验证安装器升级。公网接口本轮未重测，历史记录保留其原有边界。
+本轮 CI 新增正式打包 EXE 检查，并移除自动产物上传；不创建 Release。代码提交 `ad31e4c` 的 [远程 CI 复验](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41601852620) 已全部成功（Windows、macOS、Ubuntu）。Windows 日志确认：68 项测试、开发版 21 项桌面检查、正式打包程序 21 项桌面检查、包内容一致性审计与独立身份安装器 6 组生命周期回归通过，SHA256SUMS 生成成功。该运行 artifacts 列表为空，没有上传安装包或报告。记录结果及首页文案的后续提交只改文档，不重新打包，也不将其描述为重新执行了 CI。
+
+本轮依赖审计：生产依赖 0 个已知漏洞；完整开发工具链仍有 15 项 moderate 告警，未执行强制修复。59 个仓库 Markdown 本地链接全部有效。
+
+未验证：正式身份安装器的完整交互向导、干净 Windows 普通账号、真实历史业务迁移、macOS 实机安装。低版本 fixture 与当前版本使用同一源码，仅验证安装器升级。公网接口本轮未重测，历史记录保留其原有边界。
 
 ## Windows Setup 候选（2026-11-03）
 

@@ -1,7 +1,7 @@
 # Tangerine Skill Manager
 
 > [!WARNING]
-> **开发中，尚未正式发布。** Windows 安装版和便携版可从源码构建；安装候选仍需干净 Windows 环境验收，当前没有正式下载版本。仓库中的源码、截图和 CI 构建产物供开发与测试，不代表已发布稳定应用。
+> **开发中，尚未正式发布。** Windows 安装版和便携版可从源码构建；安装候选仍需干净 Windows 环境验收，当前没有正式下载版本。仓库中的源码、截图与 CI 验证记录供开发与测试，不代表已发布稳定应用。
 
 **一份 Skill 库，管理多个 AI Agent 的使用目录。同步前预览，遇到冲突保留原文件。**
 
@@ -32,7 +32,7 @@
 
 安装、升级和卸载前须退出应用，安装器不会强制结束正在运行的程序。升级和卸载保留本地库、配置、安装记录及 Agent 目录中的 Skill 副本；重新安装可继续读取原数据。便携版也使用本机用户数据目录，**不表示把库随 EXE 一起携带**。安装版和便携版属于同一个工具，使用同一份用户数据，不应同时运行。详见 [Windows 安装与验收](docs/WINDOWS_ACCEPTANCE.md)。
 
-已经实现的核心功能可供开发者从源码验证，但通过自动测试不等于已经完成产品交付。未来可用版本会在 [GitHub Releases](https://github.com/Manamiiii/TangerineSkillManager/releases) 发布；CI 中的未签名产物仅供开发测试。
+已经实现的核心功能可供开发者从源码验证，但通过自动测试不等于已经完成产品交付。未来可用版本会在 [GitHub Releases](https://github.com/Manamiiii/TangerineSkillManager/releases) 发布；当前 CI 只构建与测试，不自动上传安装包或创建 Release。
 
 | 平台 | 当前状态 |
 | --- | --- |

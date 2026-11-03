@@ -6,6 +6,7 @@
 - 身份：正式 app ID 为 `org.tangerineskillmanager.desktop`，安装 GUID 为 `048f50d3-d876-42d2-95f3-f0dce4cc270a`；数据位于操作系统用户数据目录的 `skill-manager`。本机目录与用户内容仅保存在本机配置中。
 - 安装策略：无需管理员权限，开始菜单和 Windows 卸载入口，运行中拒绝安装/卸载，不强杀；升级与卸载默认保留配置、库、记录和同步副本。更新仍需手动下载安装。
 - CI 修复：fixture 构建只传必要覆盖项，避免 electron-builder 重复合并资源数组造成并发复制失败。回归测试使用真实配置解析器。
+- 远程结果：代码提交 `ad31e4c` 已推送 main，[Windows/macOS/Ubuntu CI](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41601852620) 全部通过；Windows fixture 构建、正式打包程序检查和 6 组安装生命周期回归成功。本次运行没有上传产物。后续结果记录提交仅改文档。
 - 本机证据：68 项单元/集成测试；正式打包 EXE 与 Portable 各 21 项桌面检查；独立测试身份安装器 6 组生命周期检查；类型/格式/构建/隐私/包内容一致性检查通过。结果仅涵盖隔离 profile，不等于干净 Windows。
 - 安全边界：测试安装前校验独立身份，保护已有安装和快捷方式；检查 HKCU、无 HKLM 登记、包内内容、x64 与 renderer 安全开关；不关闭用户正在使用的便携实例。诊断 profile 和报告不提交或上传。
 - 未验证：正式身份交互向导、干净 Windows 普通账号、真实历史业务数据迁移、macOS 实机安装。0.0.9 fixture 使用当前代码，仅证明安装器升级流程。公网能力本轮未重测。

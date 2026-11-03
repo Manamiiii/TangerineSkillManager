@@ -69,7 +69,7 @@ npm run test:desktop -- --packaged "<候选EXE的绝对路径>" --portable --pub
 
 后一个命令会在临时配置中保存 HTTPS DNS，查询 Cloudflare、GitHub、SkillsMP 并获取测试公开仓库。它不修改个人 Agent 目录或系统网络设置。普通桌面测试不会请求这些服务。具体范围见 [开发说明](DEVELOPMENT.md)。
 
-`c45a350` 的 [CI 运行](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41598129678) 中 Windows fixture 构建失败，macOS/Linux 成功。本轮修复了打包配置重复合并造成的资源并发复制，并补充真实配置解析测试；本机 fixture 构建与生命周期已复验通过。新 CI 还执行正式 `win-unpacked` EXE 检查，不自动上传任何产物。远程复验结果见 [实际验证记录](VALIDATION.md)，不能将本机通过当作 CI 已通过；CI 也不能代替正式身份向导或干净普通账号验收。CI 不执行 Portable 封装器或公网验收。
+`c45a350` 的 [CI 运行](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41598129678) 中 Windows fixture 构建失败，macOS/Linux 成功。本轮修复了打包配置重复合并造成的资源并发复制，并补充真实配置解析测试。`ad31e4c` 的 [远程复验](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41601852620) 三个平台全部通过；Windows 包含正式 `win-unpacked` EXE 检查与 6 组安装生命周期回归，不自动上传任何产物。证据详见 [实际验证记录](VALIDATION.md)。CI 不能代替正式身份向导或干净普通账号验收，也不执行 Portable 封装器或公网验收。
 
 ## 4. 干净 Windows 验收
 
