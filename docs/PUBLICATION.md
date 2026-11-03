@@ -21,7 +21,7 @@
 
 Description：
 
-> 本地优先的 AI Agent Skill 管理器：统一管理 SKILL.md，预览并同步到多个 Agent 和项目目录。Windows 优先，无账号、无遥测。
+> 开发中，尚未对外可用。面向 Windows 的 AI Agent Skill 桌面管理器：统一管理 SKILL.md，预览并同步到多个 Agent 和项目目录。
 
 Topics（10 个以内）：`agent-skills`、`skill-manager`、`ai-agents`、`desktop-app`、`local-first`、`windows`、`typescript`、`electron`、`codex`、`claude-code`。
 

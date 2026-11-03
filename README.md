@@ -1,16 +1,19 @@
 # Tangerine Skill Manager
 
+> [!WARNING]
+> **开发中，尚未对普通用户开放使用。** 本项目的目标是可安装的 Windows 桌面应用，目前尚未提供正式安装版，也未完成公开可用版本的验收。仓库中的源码、截图和 CI 构建产物仅供开发与测试，不代表已发布可用应用。请等待后续正式版本。
+
 **一份 Skill 库，管理多个 AI Agent 的使用目录。同步前预览，遇到冲突保留原文件。**
 
 如果你已经在 Codex、Claude Code、Cursor 等工具中使用 `SKILL.md`，也遇到过“同一份 Skill 到处复制、改过之后不知道哪些副本需要更新”，这个桌面工具就是为此准备的。
 
 **Windows 优先 · 中文界面 · 本地存储 · 无账号、无遥测 · GPL v3**
 
-[开始使用](#开始使用) · [首次同步](#完成第一次同步) · [常见问题](docs/FAQ.md) · [反馈问题](https://github.com/Manamiiii/TangerineSkillManager/issues)
+[当前状态](#当前状态) · [源码启动（仅开发测试）](#源码启动) · [常见问题](docs/FAQ.md) · [反馈问题](https://github.com/Manamiiii/TangerineSkillManager/issues)
 
 ![本地库：集中查看 Skill 的来源、版本和安装状态](docs/images/library.png)
 
-*真实 Windows 桌面截图，使用内置示例与虚构测试数据。*
+*开发中的 Windows 桌面界面，使用内置示例与虚构测试数据；不是已发行版本。*
 
 ## 为什么使用它
 
@@ -23,14 +26,20 @@
 
 它管理文件和安装记录，不运行 Agent。只使用一个 Agent、很少更新 Skill 时，手工管理目录可能就够了。
 
-## 开始使用
+## 当前状态
 
-当前是 **0.1.0 试用阶段**，尚无正式发行包。可以从源码运行；以后发行包会放在 [GitHub Releases](https://github.com/Manamiiii/TangerineSkillManager/releases)。
+当前版本号为 **0.1.0，处于开发阶段，尚未对外可用**。目标是让用户下载安装桌面应用后即可使用；Windows 安装版、安装与卸载体验及公开发行验收仍需完成。普通用户暂时没有可直接安装使用的正式下载包。
+
+已经实现的核心功能可供开发者从源码验证，但通过自动测试不等于已经完成产品交付。未来可用版本会在 [GitHub Releases](https://github.com/Manamiiii/TangerineSkillManager/releases) 发布；CI 中的未签名产物仅供开发测试。
 
 | 平台 | 当前状态 |
 | --- | --- |
 | Windows x64 | 已在开发机器验证桌面流程及便携程序；尚未完成干净机器验收，产物未签名 |
 | macOS / Linux | 已通过 GitHub CI 构建和桌面流程检查；尚需实机安装验收，不承诺稳定支持 |
+
+## 源码启动
+
+**以下步骤仅面向参与开发和测试的人员，不是普通用户的安装说明。** 请使用示例数据和独立测试目录验证功能。
 
 源码启动需要 **Node.js 24 LTS 或更新的受支持版本、npm**，以及安装依赖时的公网访问。使用 Git 克隆，或从仓库的 **Code → Download ZIP** 下载源码：
 
@@ -43,7 +52,7 @@ npm start
 
 下载 ZIP 的用户进入解压后的工程目录，从 `npm ci` 开始。`npm start` 会构建并打开桌面窗口。打包后的应用不依赖 Node、Git 或 Agent 专用 CLI。
 
-## 完成第一次同步
+## 验证首次同步（仅开发测试）
 
 1. **导入示例**：在“本地库”点击 **试用内置示例**，导入 `Clear Plan`。这一步不联网，也不会写入 Agent 目录。
 2. **添加目标**：进入“Agent”，新建 Agent，先选择一个专用空目录体验；也可以选择常用 Agent 模板并核对目录。
