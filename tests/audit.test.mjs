@@ -83,3 +83,10 @@ test('checks the current machine and checkout without embedding them in rules', 
     expect(privacyIssues('README.md', value.toUpperCase(), context).length).toBeGreaterThan(0);
   expect(privacyIssues('README.md', 'Portable local Skill manager', context)).toEqual([]);
 });
+
+test('generic CI account words do not bypass actual private path detection', () => {
+  const home = ['', 'home', 'runner'].join('/');
+  const context = { username: 'runner', home };
+  expect(privacyIssues('.github/workflows/ci.yml', "runner.os == 'Windows'", context)).toEqual([]);
+  expect(privacyIssues('README.md', home + '/work', context)).toContain('current home directory');
+});

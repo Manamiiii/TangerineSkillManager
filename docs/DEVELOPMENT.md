@@ -44,7 +44,7 @@ npm run dist   # 当前平台的分发文件，禁止自动发布
 - macOS 主机：`.dmg` 和 `.zip`；可用 `npx electron-builder --mac --arm64 --publish never` 或 `--x64` 指定架构。
 - Linux 主机：AppImage；需要对应的系统构建工具与桌面运行库。
 
-产物在 `release/`。macOS DMG/签名应在 macOS 构建。CI 已配置三个 OS 的任务，但本轮尚未远程运行；它只生成待检查的产物，不创建发行版。签名、公证证书和 GitHub 发布权限由维护者通过仓库 Secrets 配置，源码不包含任何凭据。Windows 当前显式关闭签名，完成证书配置后需要有意修改构建选项。
+产物在 `release/`。macOS DMG/签名应在 macOS 构建。CI 配置了三个 OS 的任务；实际结果以 [Actions](https://github.com/Manamiiii/TangerineSkillManager/actions) 和 [验证记录](VALIDATION.md) 为准。它只生成待检查的产物，不创建发行版。签名、公证证书和 GitHub 发布权限由维护者通过仓库 Secrets 配置，源码不包含任何凭据。Windows 当前显式关闭签名，完成证书配置后需要有意修改构建选项。
 
 ## 扩展 Provider
 

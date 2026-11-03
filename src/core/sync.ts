@@ -125,10 +125,11 @@ export class SyncEngine {
           action: 'install',
           reason: agent.installationMetadata ? 'Installation metadata requires a copy.' : 'New installation.',
           sourceHash: skill.hash,
-          targetFingerprint: await fingerprint(dest),
+          targetFingerprint: 'unavailable',
         };
         try {
           await assertWritableTarget(target, targets, config, this.ctx, this.store.directory);
+          item.targetFingerprint = await fingerprint(dest);
           await this.checkReadOnlyCollision(skillId, target, targets);
           if (
             agent.installationMetadata &&

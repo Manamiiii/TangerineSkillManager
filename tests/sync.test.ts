@@ -61,7 +61,9 @@ it('allows independent library work when an Agent target becomes invalid', async
   expect((await f.importSkill()).id).toBe('example-skill');
   const snapshot = await f.app.request('snapshot', undefined);
   expect(snapshot.warnings.length).toBeGreaterThan(0);
-  expect((await f.preview()).items[0].action).toBe('conflict');
+  const plan = await f.preview();
+  expect(plan.items[0].action).toBe('conflict');
+  expect((await f.app.request('execute', { planId: plan.id }))[0].status).toBe('conflict');
   expect(await fs.readFile(f.target, 'utf8')).toBe('external file');
 });
 it('parses Markdown front matter and hashes nested file content deterministically', async () => {

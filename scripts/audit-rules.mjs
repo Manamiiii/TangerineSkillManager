@@ -26,6 +26,12 @@ export function privacyIssues(filename, content, context = {}) {
   }
   for (const key of ['username', 'hostname']) {
     const value = context[key];
+    // Generic OS/CI account words also occur in workflow syntax. Actual paths are still checked above/below.
+    if (
+      key === 'username' &&
+      ['runner', 'runneradmin', 'root', 'user', 'admin', 'administrator'].includes(value?.toLowerCase())
+    )
+      continue;
     if (value && value.length > 3 && normalized.includes(value.toLowerCase())) issues.add(`current ${key}`);
   }
   for (const match of normalized.matchAll(/(?:[a-z]:\/users\/|\/users\/|\/home\/)([^/\s"'`]+)/g)) {
