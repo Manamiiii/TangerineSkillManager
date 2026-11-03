@@ -1,5 +1,11 @@
 # 实际验证记录
 
+## 2026-11-03：三平台 CI 复验通过
+
+[GitHub Actions 运行记录](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41575874377) 对应代码提交 `b349d66`。Windows、macOS、Ubuntu 三个任务全部成功：Node.js 24 环境安装依赖、schema 一致性、格式、类型检查、**66 项测试**、隐私审计、应用构建、桌面流程和未签名打包均通过；Windows 桌面检查 21 项，其余平台各 20 项。
+
+这些结果验证 CI 宿主上的开发版桌面流程和打包，不代替各平台发行包的干净机器安装验收，不代表签名、公证或所有 Agent 实际调用通过。CI 仅上传构建产物，没有创建 Release。本节与 README 状态更新为文档变更，不改变上述已测代码。
+
 ## 2026-11-03：首次远程 CI 反馈
 
 源码和首页文档已上传 main。首轮 GitHub Actions 中，Windows 的类型检查、65 项测试、隐私审计、构建和 21 项桌面检查通过；macOS/Linux 各有 1 项测试失败：目标目录变成普通文件时，预览在单项错误处理之前读取指纹，触发 ENOTDIR。
