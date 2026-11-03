@@ -12,6 +12,7 @@ npm run build
 npm run test:desktop
 npm run audit:source
 npm run audit:source -- --staged
+npm run audit:package
 npm audit
 ```
 
@@ -40,11 +41,23 @@ npm run pack   # 未封装安装器的应用目录
 npm run dist   # 当前平台的分发文件，禁止自动发布
 ```
 
-- Windows 主机：portable `.exe`。
+- Windows 主机：x64 `TangerineSkillManager-<版本>-win-x64-Setup.exe` 和 `Portable.exe`。Setup 为当前用户安装，不请求提权，不自动启动应用；运行中的程序会阻止安装和卸载，返回非零退出码。`npm run checksums` 生成同目录 `SHA256SUMS.txt`。
 - macOS 主机：`.dmg` 和 `.zip`；可用 `npx electron-builder --mac --arm64 --publish never` 或 `--x64` 指定架构。
 - Linux 主机：AppImage；需要对应的系统构建工具与桌面运行库。
 
 产物在 `release/`。macOS DMG/签名应在 macOS 构建。CI 配置了三个 OS 的任务；实际结果以 [Actions](https://github.com/Manamiiii/TangerineSkillManager/actions) 和 [验证记录](VALIDATION.md) 为准。它只生成待检查的产物，不创建发行版。签名、公证证书和 GitHub 发布权限由维护者通过仓库 Secrets 配置，源码不包含任何凭据。Windows 当前显式关闭签名，完成证书配置后需要有意修改构建选项。
+
+## Windows 安装生命周期回归
+
+```sh
+npm run build
+npm run build:installer-fixtures
+npm run test:installer -- release/installer-acceptance/current/TangerineSkillManager-0.1.0-win-x64-Setup.exe release/installer-acceptance/previous/TangerineSkillManager-0.0.9-win-x64-Setup.exe
+```
+
+fixture 使用正式安装策略、相同应用代码与独立应用名称/GUID，避免影响正在运行的个人版本。旧版本 fixture 仅将版本号设为 0.0.9，用于验证安装器升级，不冒充历史业务数据迁移测试。实际安装到临时目录，临时写入测试应用的 HKCU 卸载登记和开始菜单入口，结束时卸载；检测到已有测试登记或同名快捷方式时拒绝覆盖。用户配置、库和同步目录都在隔离的临时 profile；不关闭用户已有程序，不读取真实 Skill 库。
+
+回归检查首次安装、真实应用导入/同步、运行中拒绝升级与卸载、升级保留数据、卸载保留数据和副本、重装恢复库。结果保存在忽略的 `test-results/installer-result.json`，含两个 fixture 的 hash；诊断目录保留在系统临时目录，不上传。CI 的 Windows job 执行同一流程。它不能代替生产应用标识、交互安装向导、普通账号和干净 Windows 验收。
 
 ## 扩展 Provider
 

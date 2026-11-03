@@ -37,7 +37,21 @@ jobs:
         run: npm run dist
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Build isolated installer fixtures (Windows)
+        if: runner.os == 'Windows'
+        run: npm run build:installer-fixtures
+      - name: Audit packaged application (Windows)
+        if: runner.os == 'Windows'
+        run: npm run audit:package
+      - name: Installed application lifecycle (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          npm run test:installer -- "release/installer-acceptance/current/TangerineSkillManager-$version-win-x64-Setup.exe" "release/installer-acceptance/previous/TangerineSkillManager-0.0.9-win-x64-Setup.exe"
+      - run: npm run checksums
       - uses: actions/upload-artifact@v4
+        # Only final candidates are uploaded; isolated fixtures stay inside the job.
         with:
           name: skill-manager-${{ runner.os }}-unsigned
           path: |
@@ -45,4 +59,5 @@ jobs:
             release/*.dmg
             release/*.zip
             release/*.AppImage
+            release/SHA256SUMS.txt
           if-no-files-found: error

@@ -1,5 +1,13 @@
 # 实际验证记录
 
+## Windows Setup 候选（2026-11-03）
+
+本机 Windows x64：66 项单元/集成测试、类型检查和构建、格式、源码隐私审计通过。正式应用目录的 EXE 完成 21 项隔离 profile 桌面检查；8 个打包应用文件通过内容隐私检查，运行代码、界面和许可文件与源码构建逐字节一致。
+
+独立测试名称/GUID 的 NSIS fixture 完成 5 组生命周期回归：安装并在真实应用中导入/同步示例；运行中拒绝升级与卸载；0.0.9 fixture 升至 0.1.0；卸载保留配置、库、安装记录及同步副本；重装恢复并清理测试安装入口。旧 fixture 使用当前代码，只验证安装器版本升级，不验证历史数据迁移。生产标识的安装器在已有便携实例运行时返回 2，未终止用户程序。结果见忽略的 `test-results/installer-result.json` 和 `packaged-result.json`。
+
+正式候选为 `release/TangerineSkillManager-0.1.0-win-x64-Setup.exe`，123,802,138 bytes，SHA-256：`d600cdf69bc3b1845993e938d365470608bf8083befcc3e75c1b58f4172764ac`。同目录提供 Portable 和 SHA256SUMS.txt。全部未签名、未公开发布；生产标识交互向导、干净 Windows 普通账号和 macOS 安装未验证。新增 CI 流程以实际运行结果为准。
+
 ## 2026-11-03：三平台 CI 复验通过
 
 [GitHub Actions 运行记录](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41575874377) 对应代码提交 `b349d66`。Windows、macOS、Ubuntu 三个任务全部成功：Node.js 24 环境安装依赖、schema 一致性、格式、类型检查、**66 项测试**、隐私审计、应用构建、桌面流程和未签名打包均通过；Windows 桌面检查 21 项，其余平台各 20 项。

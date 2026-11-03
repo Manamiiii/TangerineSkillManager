@@ -8,15 +8,15 @@
 
 | 项目 | 当前记录 |
 | --- | --- |
-| 版本 / 平台 | 0.1.0 / Windows x64 portable |
-| 本地候选文件 | `release/gpl-20261103/Tangerine Skill Manager 0.1.0.exe`（GPL-3.0-only） |
-| 文件大小 | 112,070,753 bytes |
-| SHA-256 | `a7908720bcc513d74807117d1f1b9648515e73ba22c44ac8f2da5b3ac7a5998e` |
+| 版本 / 平台 | 0.1.0 / Windows x64 Setup，另提供 Portable |
+| 本地候选文件 | `release/TangerineSkillManager-0.1.0-win-x64-Setup.exe`（GPL-3.0-only） |
+| 文件大小 | 123,802,138 bytes |
+| SHA-256 | `d600cdf69bc3b1845993e938d365470608bf8083befcc3e75c1b58f4172764ac` |
 | 签名 | 未签名，不能宣传为已签名安装包 |
-| 自动验证 | 当前 GPL 候选完成 21 项离线便携桌面检查；此前网络版本完成 60 项单元/集成测试及开发版和便携版各 24 项含真实联网检查，本次未重跑这两类检查 |
+| 自动验证 | 66 项测试、正式打包程序 21 项桌面检查、独立安装标识 fixture 的 5 组生命周期回归；不代替正式标识向导和干净机器验收 |
 | 真实联网范围 | 此前网络版本：GitHub/SkillsMP 各 20 条结果；Git 发现、导入、commit 来源记录和内容未变检查；版本查询返回暂无正式发行版 |
 | 其他检查 | 类型检查、构建、格式、源码审计、打包运行文件一致性通过 |
-| 证据位置 | [实际验证记录](VALIDATION.md)；当前 `test-results/portable-result.json`；此前 `test-results/portable-network-result.json`，以各自 artifact hash 区分 |
+| 证据位置 | [实际验证记录](VALIDATION.md)；`test-results/packaged-result.json`、`test-results/installer-result.json`，按各自产物 hash 区分 |
 
 以上是已有执行记录，不代表每次修改后自动继续有效。源代码、依赖、配置或产物发生变化时，重新执行受影响检查。必须同时记录命令退出码和实际产物 hash，不能用旧的 `passed: true` 文件证明新运行成功。
 

@@ -6,24 +6,33 @@
 
 - 使用可恢复的 Windows x64 虚拟机或没有项目配置的测试机器，记录实际系统版本和 build。优先使用普通非管理员账号。
 - 不预装 Node、npm、Git、任何 Agent 或专用 CLI，不复制开发者的 AppData、证书、配置或凭据。
-- 只提供本轮候选便携 EXE 和对应 `SHA256SUMS.txt`；先核对文件名、字节数与 SHA-256。可用系统 PowerShell 的 `Get-FileHash -LiteralPath '<EXE路径>' -Algorithm SHA256`，无需安装工具。
+- 提供本轮候选 `Setup.exe` 和对应 `SHA256SUMS.txt`；先核对文件名、字节数与 SHA-256。可用系统 PowerShell 的 `Get-FileHash -LiteralPath '<EXE路径>' -Algorithm SHA256`，无需安装工具。Portable 是可选的另一个入口，不代替安装器验收。
 - 使用文件管理器新建 `%USERPROFILE%\SkillManager-Acceptance`，其下建 `source`、`target`、`project` 三个文件夹。所有试验只用这些目录和新账号的应用配置，不能选择工作文件。
 - 未签名包可能出现系统提示或阻止。记录实际提示和下载途径；不要关闭安全软件、安装未知证书或更改系统安全策略来制造通过结果。若阻止启动，记录失败并交回维护者处理分发问题。
 
 ## A. 离线启动与本地同步（Windows 首版必要）
 
+先完成安装器检查：
+
+1. 双击 Setup，以普通账号完成安装；预期不请求管理员权限、不下载 Node/Git，不自动启动程序。
+2. 从开始菜单打开 Tangerine Skill Manager；Windows“已安装的应用”中应有对应版本和卸载入口。默认不创建桌面快捷方式。
+3. 完成下面 A、B、D 的测试。运行中再次安装或卸载，应提示退出并停止，原程序继续运行。
+4. 退出程序，重新运行相同版本 Setup；预期覆盖安装成功，库、设置和同步副本保留。不同版本的真实升级应另记录源版本、目标版本与结果，不能把同版本重装写成升级通过。
+5. 退出后从 Windows 设置卸载；预期程序及开始菜单入口删除，库、配置和同步到测试 Agent 的副本保留。
+6. 再次安装并打开；预期能够读取原库。应用卸载不负责撤销已同步的 Skill；需要移除副本时先在应用中预览并执行对应操作。
+
 在无网络连接的测试环境中执行 A、B、D；联网能力只在 C 单独验证。
 
 | 步骤 | 操作 | 预期结果 |
 | --- | --- | --- |
-| A1 | 从文件管理器直接打开便携 EXE，不传测试或调试参数 | 正常打开中文界面；不要求账号、管理员权限、Node、Git 或联网下载运行时 |
+| A1 | 从开始菜单打开已安装程序，不传测试或调试参数 | 正常打开中文界面；不要求账号、管理员权限、Node、Git 或联网下载运行时 |
 | A2 | 在空本地库点击“试用内置示例” | 出现 Clear Plan；只导入本地库，没有自动写入 Agent 目录 |
 | A3 | 到 Agent 页禁用默认 Generic .agents；新增 `acceptance`，显示名称为“验收 Agent”，用户目录为 `~/SkillManager-Acceptance/target`，项目目录为 `{workspace}/.agents/skills` | 保存成功；目录可编辑；没有依赖某个真实 Agent 软件 |
 | A4 | 绑定 `project` 文件夹，项目标识为 `acceptance-project` | 项目出现；能查看项目和目标目录状态 |
 | A5 | 在 `target` 中用记事本创建 `keep.txt`，写入 `external neighbor` | 这是本工具未管理的文件，后续必须保留 |
 | A6 | 选择 Clear Plan，在同步页只选验收 Agent 的用户级和项目级目标，使用 copy，预览后执行 | 预览显示新增；执行两个目标均成功；`target/clear-plan/SKILL.md` 和 `project/.agents/skills/clear-plan/SKILL.md` 存在；`keep.txt` 不变 |
 | A7 | 再次预览相同选择 | 显示内容一致或跳过，没有重复新增或要求覆盖 |
-| A8 | 退出程序，再直接打开同一个 EXE | 本地库、Agent、项目及安装状态保留；可继续扫描和使用 |
+| A8 | 退出程序，再从开始菜单打开 | 本地库、Agent、项目及安装状态保留；可继续扫描和使用 |
 
 如果系统隐藏文件扩展名，应核对实际名称，避免产生 `SKILL.md.txt` 或 `keep.txt.txt`。
 
@@ -88,6 +97,7 @@ Windows 版本 / build / 架构：
 签名状态 / 下载途径 / 系统提示：
 
 A1–A8：逐项填写 通过 / 失败 / 未执行，并写实际现象
+安装向导、开始菜单、运行中保护、覆盖安装、卸载保留、重装恢复：逐项记录
 B1–B6：逐项填写 通过 / 失败 / 未执行，并写实际现象
 C：系统 DNS、可选 HTTPS DNS、版本、两个市场、Git、断网本地使用分别记录
 D1–D3：逐项填写 通过 / 失败 / 未执行，并写实际现象

@@ -27,11 +27,15 @@
     "dev": "npm run start",
     "preview": "vite preview",
     "test:desktop": "node scripts/desktop-smoke.mjs",
+    "test:installer": "node scripts/windows-installer-smoke.mjs",
+    "build:installer-fixtures": "node scripts/build-installer-fixtures.mjs",
+    "checksums": "node scripts/checksums.mjs",
     "test:git:public": "tsx scripts/public-git-smoke.ts",
     "test:services:public": "tsx scripts/public-services-smoke.ts",
     "pack": "npm run build && electron-builder --dir",
     "dist": "npm run build && electron-builder --publish never",
-    "audit:source": "node scripts/audit.mjs"
+    "audit:source": "node scripts/audit.mjs",
+    "audit:package": "node scripts/audit-package.mjs"
   },
   "build": {
     "appId": "org.tangerineskillmanager.desktop",
@@ -57,10 +61,42 @@
     "npmRebuild": false,
     "win": {
       "target": [
-        "portable"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.ico",
       "signExecutable": false
+    },
+    "nsis": {
+      "guid": "048f50d3-d876-42d2-95f3-f0dce4cc270a",
+      "artifactName": "TangerineSkillManager-${version}-win-${arch}-Setup.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "packElevateHelper": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": false,
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": true,
+      "installerLanguages": [
+        "zh_CN",
+        "en_US"
+      ],
+      "include": "build/installer.nsh"
+    },
+    "portable": {
+      "artifactName": "TangerineSkillManager-${version}-win-${arch}-Portable.${ext}"
     },
     "mac": {
       "target": [
