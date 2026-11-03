@@ -6,6 +6,10 @@ import { listPackage, extractFile, statFile } from '@electron/asar';
 import { privacyIssues } from './audit-rules.mjs';
 
 const archive = process.argv[2] ?? 'release/win-unpacked/resources/app.asar';
+const manifest = JSON.parse(await fs.readFile('package.json', 'utf8'));
+const packagedManifest = JSON.parse(extractFile(archive, 'package.json').toString('utf8'));
+for (const field of ['name', 'version', 'license', 'main'])
+  assert.equal(packagedManifest[field], manifest[field], `Packaged identity differs: ${field}`);
 const context = {
   home: os.homedir(),
   workspace: process.cwd(),
@@ -26,4 +30,9 @@ for (const entry of listPackage(archive)) {
   checked++;
 }
 assert.ok(checked >= 7, 'No application payload found; refusing an empty audit.');
+assert.deepEqual(
+  await fs.readFile(path.join(path.dirname(archive), 'examples', 'clear-plan', 'SKILL.md')),
+  await fs.readFile('examples/clear-plan/SKILL.md'),
+  'Packaged example differs from the public example',
+);
 console.log(`Packaged application privacy and source consistency passed: ${checked} files.`);

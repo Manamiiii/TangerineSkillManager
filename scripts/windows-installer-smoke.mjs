@@ -42,6 +42,14 @@ async function ps(script, extra = {}) {
     )
   ).stdout.trim();
 }
+// Check the actual installer identity before it can touch any registry key or installation.
+for (const file of [candidate, previous]) {
+  const product = await ps(
+    `(Get-Item -LiteralPath $env:TSM_TEST_SETUP -ErrorAction Stop).VersionInfo.ProductName`,
+    { TSM_TEST_SETUP: file },
+  );
+  assert.equal(product, fixture.name, 'Refusing a production or unrelated installer in the fixture test.');
+}
 // The real installer uses HKCU even with a redirected profile. Never replace an existing installation.
 const registryScript = `@('HKCU','HKLM') | ForEach-Object {
   $hive = $_
@@ -54,11 +62,11 @@ assert.equal(
   '',
   'Existing installation detected; use a disposable Windows account.',
 );
-const shortcut = await ps(
+const hostShortcut = await ps(
   `[IO.Path]::Combine([Environment]::GetFolderPath('Programs'), '${fixture.name}.lnk')`,
 );
 assert.equal(
-  await fs.stat(shortcut).then(
+  await fs.stat(hostShortcut).then(
     () => true,
     () => false,
   ),
@@ -68,6 +76,16 @@ assert.equal(
 const root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), 'tsm-installer-'));
 const installed = path.join(root, 'installed');
 const env = await packagedEnvironment(root, electronPath);
+const shortcut = await ps(
+  `[IO.Path]::Combine([Environment]::GetFolderPath('Programs', 'DoNotVerify'), '${fixture.name}.lnk')`,
+  env,
+);
+assert.ok(
+  path
+    .resolve(shortcut)
+    .toLowerCase()
+    .startsWith(root.toLowerCase() + path.sep),
+);
 const executable = path.join(installed, `${fixture.name}.exe`);
 const uninstaller = path.join(installed, `Uninstall ${fixture.name}.exe`);
 const resultPath = 'test-results/installer-result.json';
@@ -76,12 +94,54 @@ await fs.rm(resultPath, { force: true });
 let app;
 let installedByTest = false;
 const checks = [];
+const normalize = (value) => path.resolve(value).toLowerCase();
+async function verifyRegistration(version) {
+  await fs.access(shortcut);
+  const registration = JSON.parse(
+    await ps(
+      `
+    $entry = Get-ItemProperty -LiteralPath 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${guid}' -ErrorAction Stop
+    $location = Get-ItemProperty -LiteralPath 'HKCU:\\Software\\${guid}' -ErrorAction Stop
+    $shell = New-Object -ComObject WScript.Shell
+    $link = $shell.CreateShortcut($env:TSM_TEST_SHORTCUT)
+    [pscustomobject]@{version=$entry.DisplayVersion; name=$entry.DisplayName; uninstall=$entry.UninstallString; location=$location.InstallLocation; shortcut=$link.TargetPath} | ConvertTo-Json
+  `,
+      { TSM_TEST_SHORTCUT: shortcut },
+    ),
+  );
+  assert.equal(registration.version, version);
+  assert.equal(registration.name, `${fixture.name} ${version}`);
+  assert.equal(normalize(registration.location), normalize(installed));
+  assert.equal(normalize(registration.shortcut), normalize(executable));
+  assert.ok(registration.uninstall.includes(uninstaller));
+  assert.ok(registration.uninstall.includes('/currentuser'));
+  assert.equal(
+    await ps(
+      `@('Software\\${guid}', 'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${guid}', 'Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${guid}') | ForEach-Object { if (Test-Path -LiteralPath ('HKLM:\\' + $_)) { Write-Output 'present' } }`,
+    ),
+    '',
+    'Per-user installation must not create machine-wide registration.',
+  );
+}
+
+async function verifyInstalledPayload(setupFile) {
+  // The actual installed archive must match the fixture packaged from this checkout.
+  const expected = await fs.readFile(
+    path.join(path.dirname(setupFile), 'win-unpacked', 'resources', 'app.asar'),
+  );
+  assert.deepEqual(await fs.readFile(path.join(installed, 'resources', 'app.asar')), expected);
+  assert.deepEqual(
+    await fs.readFile(path.join(installed, 'resources', 'examples', 'clear-plan', 'SKILL.md')),
+    await fs.readFile('examples/clear-plan/SKILL.md'),
+  );
+}
 async function setup(file) {
   // /D must be the last, unquoted NSIS argument even if it contains spaces.
   assert.equal(path.dirname(installed), root);
   await run(file, ['/S', '/currentuser', `/D=${installed}`], { env, windowsHide: true, timeout: 120000 });
   installedByTest = true;
   await fs.access(executable);
+  await verifyInstalledPayload(file);
 }
 async function remove() {
   assert.equal(path.dirname(uninstaller), installed);
@@ -108,11 +168,24 @@ async function open() {
     version: app.getVersion(),
     packaged: app.isPackaged,
     data: app.getPath('appData'),
+    arch: process.arch,
   }));
   assert.ok(runtime.packaged);
+  assert.equal(runtime.arch, 'x64');
   assert.equal(path.resolve(runtime.data).toLowerCase(), path.resolve(env.APPDATA).toLowerCase());
+  const security = await app.evaluate(({ BrowserWindow }) => {
+    const prefs = BrowserWindow.getAllWindows()[0].webContents.getLastWebPreferences();
+    return {
+      sandbox: prefs.sandbox,
+      isolation: prefs.contextIsolation,
+      webSecurity: prefs.webSecurity,
+      node: prefs.nodeIntegration,
+    };
+  });
+  assert.deepEqual(security, { sandbox: true, isolation: true, webSecurity: true, node: false });
   const page = await app.firstWindow();
   await page.waitForFunction(() => typeof window.skillManager?.request === 'function');
+  assert.equal(await page.evaluate(() => typeof window.require), 'undefined');
   return { page, version: runtime.version };
 }
 async function close() {
@@ -138,8 +211,14 @@ try {
   assert.ok((await ps(registryScript)).includes('present'));
   const first = await open();
   assert.notEqual(first.version, manifest.version);
+  await verifyRegistration(first.version);
   await call(first.page, 'importExample');
   const snapshot = await call(first.page, 'snapshot');
+  assert.equal(
+    normalize(snapshot.configPath),
+    normalize(path.join(env.APPDATA, 'skill-manager', 'config.json')),
+  );
+  assert.ok(normalize(snapshot.vaultPath).startsWith(normalize(env.APPDATA) + path.sep));
   const target = path.join(root, 'target');
   await fs.mkdir(target);
   await fs.writeFile(path.join(target, 'keep.txt'), 'unmanaged neighbor');
@@ -171,16 +250,21 @@ try {
     ].map(async (file) => [file, await fs.readFile(file)]),
   );
   checks.push('older fixture installed; real packaged app imports and synchronizes bundled example');
+  checks.push(
+    'per-user registration and start menu target verified; installed payload matches fixture; renderer security enabled',
+  );
   // Both upgrade and uninstall must refuse to terminate a running app, including silent mode.
   await assert.rejects(setup(candidate), (error) => error.code === 2);
   await assert.rejects(remove(), (error) => error.code === 2);
   await call(first.page, 'snapshot');
+  await preserved(files);
   checks.push('running app blocks upgrade and uninstall without termination');
   await close();
   await setup(candidate);
   await preserved(files);
   const upgraded = await open();
   assert.equal(upgraded.version, manifest.version);
+  await verifyRegistration(upgraded.version);
   assert.equal((await call(upgraded.page, 'snapshot')).skills.length, 1);
   await close();
   checks.push('upgrade changes version and preserves config, vault, records and synchronized files');

@@ -10,10 +10,10 @@
 | --- | --- |
 | 版本 / 平台 | 0.1.0 / Windows x64 Setup，另提供 Portable |
 | 本地候选文件 | `release/TangerineSkillManager-0.1.0-win-x64-Setup.exe`（GPL-3.0-only） |
-| 文件大小 | 123,802,138 bytes |
-| SHA-256 | `d600cdf69bc3b1845993e938d365470608bf8083befcc3e75c1b58f4172764ac` |
+| 文件大小 | 123,802,132 bytes |
+| SHA-256 | `313f96f445a3968a635d224733cf634afaab4b0f493e2a42f61ace885518cd8a` |
 | 签名 | 未签名，不能宣传为已签名安装包 |
-| 自动验证 | 66 项测试、正式打包程序 21 项桌面检查、独立安装标识 fixture 的 5 组生命周期回归；不代替正式标识向导和干净机器验收 |
+| 自动验证 | 68 项测试、正式打包程序 21 项桌面检查、独立安装标识 fixture 的 6 组生命周期回归；不代替正式标识向导和干净机器验收 |
 | 真实联网范围 | 此前网络版本：GitHub/SkillsMP 各 20 条结果；Git 发现、导入、commit 来源记录和内容未变检查；版本查询返回暂无正式发行版 |
 | 其他检查 | 类型检查、构建、格式、源码审计、打包运行文件一致性通过 |
 | 证据位置 | [实际验证记录](VALIDATION.md)；`test-results/packaged-result.json`、`test-results/installer-result.json`，按各自产物 hash 区分 |
@@ -69,7 +69,7 @@ npm run test:desktop -- --packaged "<候选EXE的绝对路径>" --portable --pub
 
 后一个命令会在临时配置中保存 HTTPS DNS，查询 Cloudflare、GitHub、SkillsMP 并获取测试公开仓库。它不修改个人 Agent 目录或系统网络设置。普通桌面测试不会请求这些服务。具体范围见 [开发说明](DEVELOPMENT.md)。
 
-现有 `.github/workflows/ci.yml` 的三个系统任务已在代码提交 `b349d66` [运行通过](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41575874377)，包含单元测试、开发版桌面检查和打包，**没有自动执行便携 EXE 或公网验收**。该 CI 不能代替上面的候选包检查，更不能代替干净用户机器测试。表中的本地 GPL 候选是较早的包，不能把新代码的 CI 结果附会到该包上。
+`c45a350` 的 [CI 运行](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41598129678) 中 Windows fixture 构建失败，macOS/Linux 成功。本轮修复了打包配置重复合并造成的资源并发复制，并补充真实配置解析测试；本机 fixture 构建与生命周期已复验通过。新 CI 还执行正式 `win-unpacked` EXE 检查，不自动上传任何产物。远程复验结果见 [实际验证记录](VALIDATION.md)，不能将本机通过当作 CI 已通过；CI 也不能代替正式身份向导或干净普通账号验收。CI 不执行 Portable 封装器或公网验收。
 
 ## 4. 干净 Windows 验收
 

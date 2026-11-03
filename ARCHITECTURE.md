@@ -10,6 +10,12 @@ An offline-first desktop application for a personal Skill library and explicit s
 
 Use Electron, React, Vite and TypeScript. Electron packages its runtime, and an embedded JavaScript Git implementation removes any runtime dependency on Git or a shell. This makes the same security and provider implementation testable on all platforms. Tradeoff: larger distribution and memory use than Tauri. There is no Rust component; Rust checks are not applicable. Node is needed only for development. Renderer sandboxing, context isolation, strict CSP and narrow validated IPC are mandatory.
 
+## Windows distribution
+
+Windows distribution policy (2026-11-03): this repository produces its own x64 NSIS Setup and Portable, with stable application ID `org.tangerineskillmanager.desktop` and installer GUID `048f50d3-d876-42d2-95f3-f0dce4cc270a`. Setup installs for the current user, never requests elevation, creates a Start Menu entry and HKCU uninstall registration, and does not start the app or create a desktop shortcut automatically. A custom NSIS process check refuses install/upgrade/uninstall while the app is running; it does not terminate it. Uninstall preserves configuration, vault, ownership records and synchronized Agent content. Setup and Portable share the same user data identity; there is no separate cloud account or migration service.
+
+Installer automation uses a different application name, app ID and GUID plus an isolated process profile. It checks the binary product identity before execution and refuses existing fixture registration/shortcuts. Fixture build options only override identity, output and version: electron-builder already merges `package.json`, and repeating object arrays would schedule duplicate resource copies. Old-version fixtures use current application code and prove installer version handling only, not historical data migration. CI builds/tests but does not upload installers or create Releases. Formal-identity interactive installation and clean Windows standard-user acceptance remain separate release gates.
+
 ## Layers and domain
 
 - `src/shared`: versioned configuration schema, transport types and domain models. No filesystem access.

@@ -43,6 +43,9 @@ jobs:
       - name: Audit packaged application (Windows)
         if: runner.os == 'Windows'
         run: npm run audit:package
+      - name: Packaged application acceptance (Windows)
+        if: runner.os == 'Windows'
+        run: npm run test:desktop -- --packaged "${{ github.workspace }}/release/win-unpacked/Tangerine Skill Manager.exe"
       - name: Installed application lifecycle (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -50,14 +53,4 @@ jobs:
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
           npm run test:installer -- "release/installer-acceptance/current/TangerineSkillManager-$version-win-x64-Setup.exe" "release/installer-acceptance/previous/TangerineSkillManager-0.0.9-win-x64-Setup.exe"
       - run: npm run checksums
-      - uses: actions/upload-artifact@v4
-        # Only final candidates are uploaded; isolated fixtures stay inside the job.
-        with:
-          name: skill-manager-${{ runner.os }}-unsigned
-          path: |
-            release/*.exe
-            release/*.dmg
-            release/*.zip
-            release/*.AppImage
-            release/SHA256SUMS.txt
-          if-no-files-found: error
+      # Build and test only. Do not upload installers, profiles or reports from this public repository.

@@ -49,6 +49,8 @@ npm run dist   # 当前平台的分发文件，禁止自动发布
 
 ## Windows 安装生命周期回归
 
+构建脚本只覆盖测试身份、输出目录和版本，继承正式 `package.json` 的打包策略。不要再把整份 `build` 配置传入程序接口：对象数组会重复合并，导致相同资源被并发复制；`tests/installer-config.test.mjs` 使用真实打包配置解析器回归此边界。
+
 ```sh
 npm run build
 npm run build:installer-fixtures
@@ -58,6 +60,8 @@ npm run test:installer -- release/installer-acceptance/current/TangerineSkillMan
 fixture 使用正式安装策略、相同应用代码与独立应用名称/GUID，避免影响正在运行的个人版本。旧版本 fixture 仅将版本号设为 0.0.9，用于验证安装器升级，不冒充历史业务数据迁移测试。实际安装到临时目录，临时写入测试应用的 HKCU 卸载登记和开始菜单入口，结束时卸载；检测到已有测试登记或同名快捷方式时拒绝覆盖。用户配置、库和同步目录都在隔离的临时 profile；不关闭用户已有程序，不读取真实 Skill 库。
 
 回归检查首次安装、真实应用导入/同步、运行中拒绝升级与卸载、升级保留数据、卸载保留数据和副本、重装恢复库。结果保存在忽略的 `test-results/installer-result.json`，含两个 fixture 的 hash；诊断目录保留在系统临时目录，不上传。CI 的 Windows job 执行同一流程。它不能代替生产应用标识、交互安装向导、普通账号和干净 Windows 验收。
+
+当前 Windows CI 还会运行正式 `win-unpacked` EXE 的隔离桌面检查，检查包内文件、身份、示例与构建输入一致，再运行独立身份安装器回归。安装回归额外核对 HKCU 卸载名称/版本/位置、开始菜单目标、未写入 HKLM、安装后的 ASAR 与 fixture 一致，以及 x64 运行时、sandbox/contextIsolation/webSecurity 和关闭 Node 集成。当前工作流**不上传安装包或测试 profile，也不创建 Release**；SHA256SUMS 仅在构建目录生成。
 
 ## 扩展 Provider
 
