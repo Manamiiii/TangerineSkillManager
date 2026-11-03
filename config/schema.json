@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "number",
+      "const": 1
+    },
+    "vault": {
+      "type": "object",
+      "properties": {
+        "root": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "root"
+      ],
+      "additionalProperties": false
+    },
+    "defaultSyncMode": {
+      "type": "string",
+      "enum": [
+        "copy",
+        "symlink"
+      ]
+    },
+    "network": {
+      "type": "object",
+      "properties": {
+        "dns": {
+          "type": "string",
+          "enum": [
+            "system",
+            "cloudflare"
+          ]
+        }
+      },
+      "required": [
+        "dns"
+      ],
+      "additionalProperties": false
+    },
+    "agents": {
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "userDirectories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "projectDirectories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "extraDirectories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "readOnlySources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "installationMetadata": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-][a-zA-Z0-9_.-]*\\.json$"
+              },
+              "values": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "filename",
+              "values"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "enabled",
+          "order",
+          "userDirectories",
+          "projectDirectories",
+          "extraDirectories",
+          "readOnlySources"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "projects": {
+      "maxItems": 500,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "root": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "root"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "providers": {
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "local",
+              "git",
+              "registry",
+              "npm",
+              "pip",
+              "cli"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "ref": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "subdirectory": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "offline": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "kind",
+          "name",
+          "enabled",
+          "location",
+          "offline"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "vault",
+    "defaultSyncMode",
+    "agents",
+    "projects",
+    "providers"
+  ],
+  "additionalProperties": false
+}

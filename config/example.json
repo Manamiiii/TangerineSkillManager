@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "vault": {
+    "root": "{data}/skill-manager/vault/skills"
+  },
+  "defaultSyncMode": "copy",
+  "agents": [
+    {
+      "key": "generic",
+      "name": "Generic .agents",
+      "enabled": true,
+      "order": 0,
+      "userDirectories": [
+        "~/.agents/skills"
+      ],
+      "projectDirectories": [
+        "{workspace}/.agents/skills"
+      ],
+      "extraDirectories": [],
+      "readOnlySources": []
+    }
+  ],
+  "projects": [],
+  "providers": []
+}

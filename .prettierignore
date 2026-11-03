@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-desktop
+release
+test-results
+package-lock.json
+config/schema.json
+config/example.json

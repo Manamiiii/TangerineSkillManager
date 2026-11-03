@@ -1,0 +1,101 @@
+{
+  "name": "tangerine-skill-manager",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An offline-first desktop library and safe synchronization tool for AI Agent Skills",
+  "license": "GPL-3.0-only",
+  "author": "Tangerine Skill Manager contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Manamiiii/TangerineSkillManager.git"
+  },
+  "homepage": "https://github.com/Manamiiii/TangerineSkillManager",
+  "bugs": {
+    "url": "https://github.com/Manamiiii/TangerineSkillManager/issues"
+  },
+  "type": "module",
+  "main": "dist-desktop/main.cjs",
+  "scripts": {
+    "schema": "tsx scripts/schema.ts",
+    "icons": "node scripts/icons.mjs",
+    "notices": "node scripts/notices.mjs",
+    "format:check": "prettier --check src tests scripts vite.config.ts tsconfig.json package.json .github/workflows/ci.yml",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "npm run typecheck && vite build && node scripts/build-desktop.mjs",
+    "start": "npm run build && electron .",
+    "dev": "npm run start",
+    "preview": "vite preview",
+    "test:desktop": "node scripts/desktop-smoke.mjs",
+    "test:git:public": "tsx scripts/public-git-smoke.ts",
+    "test:services:public": "tsx scripts/public-services-smoke.ts",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder --publish never",
+    "audit:source": "node scripts/audit.mjs"
+  },
+  "build": {
+    "appId": "org.tangerineskillmanager.desktop",
+    "productName": "Tangerine Skill Manager",
+    "icon": "build/icon.png",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-desktop/**/*",
+      "package.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.txt"
+    ],
+    "asar": true,
+    "extraResources": [
+      {
+        "from": "examples",
+        "to": "examples"
+      }
+    ],
+    "npmRebuild": false,
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "build/icon.ico",
+      "signExecutable": false
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development"
+    }
+  },
+  "dependencies": {
+    "isomorphic-git": "1.44.8",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "yaml": "2.9.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "electron": "45.1.0",
+    "electron-builder": "26.18.0",
+    "esbuild": "0.28.2",
+    "prettier": "3.9.10",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  }
+}
