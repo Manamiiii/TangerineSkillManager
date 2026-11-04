@@ -62,20 +62,30 @@ assert.equal(
   '',
   'Existing installation detected; use a disposable Windows account.',
 );
-const hostShortcut = await ps(
-  `[IO.Path]::Combine([Environment]::GetFolderPath('Programs'), '${fixture.name}.lnk')`,
-);
 assert.equal(
-  await fs.stat(hostShortcut).then(
-    () => true,
-    () => false,
-  ),
-  false,
+  await ps(`@('Programs','CommonPrograms','DesktopDirectory','CommonDesktopDirectory') | ForEach-Object {
+    $folder = [Environment]::GetFolderPath($_, 'DoNotVerify')
+    if (Test-Path -LiteralPath ([IO.Path]::Combine($folder, '${fixture.name}.lnk')) -ErrorAction Stop) { 'present' }
+  }`),
+  '',
   'Existing shortcut must be preserved.',
 );
 const root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), 'tsm-installer-'));
-const installed = path.join(root, 'installed');
 const env = await packagedEnvironment(root, electronPath);
+env.TSM_FIXTURE_LOCAL = env.LOCALAPPDATA;
+assert.equal(await ps("[Environment]::GetFolderPath('LocalApplicationData')", env), env.LOCALAPPDATA);
+assert.equal(
+  await ps(`(Get-Process -Name '${fixture.name}' -ErrorAction SilentlyContinue | Measure-Object).Count`),
+  '0',
+);
+const programs = path.join(env.LOCALAPPDATA, 'Programs');
+const family = path.join(programs, 'Tangerine');
+const legacy = path.join(programs, fixture.name);
+const current = path.join(family, fixture.name.replaceAll(' ', ''));
+let installed = legacy;
+await fs.mkdir(family, { recursive: true });
+const sibling = path.join(family, 'neighbor.txt');
+await fs.writeFile(sibling, 'keep');
 const shortcut = await ps(
   `[IO.Path]::Combine([Environment]::GetFolderPath('Programs', 'DoNotVerify'), '${fixture.name}.lnk')`,
   env,
@@ -86,8 +96,8 @@ assert.ok(
     .toLowerCase()
     .startsWith(root.toLowerCase() + path.sep),
 );
-const executable = path.join(installed, `${fixture.name}.exe`);
-const uninstaller = path.join(installed, `Uninstall ${fixture.name}.exe`);
+const executable = () => path.join(installed, `${fixture.name}.exe`);
+const uninstaller = () => path.join(installed, `Uninstall ${fixture.name}.exe`);
 const resultPath = 'test-results/installer-result.json';
 await fs.mkdir('test-results', { recursive: true });
 await fs.rm(resultPath, { force: true });
@@ -104,7 +114,7 @@ async function verifyRegistration(version) {
     $location = Get-ItemProperty -LiteralPath 'HKCU:\\Software\\${guid}' -ErrorAction Stop
     $shell = New-Object -ComObject WScript.Shell
     $link = $shell.CreateShortcut($env:TSM_TEST_SHORTCUT)
-    [pscustomobject]@{version=$entry.DisplayVersion; name=$entry.DisplayName; uninstall=$entry.UninstallString; location=$location.InstallLocation; shortcut=$link.TargetPath} | ConvertTo-Json
+    [pscustomobject]@{version=$entry.DisplayVersion; name=$entry.DisplayName; uninstall=$entry.UninstallString; location=$location.InstallLocation; shortcut=$link.TargetPath; icon=$link.IconLocation; args=$link.Arguments; cwd=$link.WorkingDirectory} | ConvertTo-Json
   `,
       { TSM_TEST_SHORTCUT: shortcut },
     ),
@@ -112,8 +122,17 @@ async function verifyRegistration(version) {
   assert.equal(registration.version, version);
   assert.equal(registration.name, `${fixture.name} ${version}`);
   assert.equal(normalize(registration.location), normalize(installed));
-  assert.equal(normalize(registration.shortcut), normalize(executable));
-  assert.ok(registration.uninstall.includes(uninstaller));
+  assert.equal(normalize(registration.shortcut), normalize(executable()));
+  await run(process.execPath, [path.resolve('scripts/audit-icons.mjs'), executable()], {
+    windowsHide: true,
+    timeout: 30000,
+  });
+  assert.equal(registration.args, '');
+  assert.ok(!registration.cwd || normalize(registration.cwd) === normalize(installed));
+  assert.ok(
+    ['', ',0', executable() + ',0'].map((s) => s.toLowerCase()).includes(registration.icon.toLowerCase()),
+  );
+  assert.ok(registration.uninstall.includes(uninstaller()));
   assert.ok(registration.uninstall.includes('/currentuser'));
   assert.equal(
     await ps(
@@ -135,35 +154,38 @@ async function verifyInstalledPayload(setupFile) {
     await fs.readFile('examples/clear-plan/SKILL.md'),
   );
 }
-async function setup(file) {
-  // /D must be the last, unquoted NSIS argument even if it contains spaces.
-  assert.equal(path.dirname(installed), root);
-  await run(file, ['/S', '/currentuser', `/D=${installed}`], { env, windowsHide: true, timeout: 120000 });
+async function setup(file, args = []) {
+  assert.ok([legacy, current].includes(installed) && installed.startsWith(root + path.sep));
+  await run(file, ['/S', '/currentuser', ...args], { env, windowsHide: true, timeout: 120000 });
   installedByTest = true;
-  await fs.access(executable);
+  await fs.access(executable());
   await verifyInstalledPayload(file);
 }
 async function remove() {
-  assert.equal(path.dirname(uninstaller), installed);
-  assert.equal(path.dirname(installed), root);
+  assert.ok([legacy, current].includes(installed) && installed.startsWith(root + path.sep));
   // _?= executes the uninstaller in place so the exit code covers the actual operation.
-  await run(uninstaller, ['/S', '/currentuser', `_?=${installed}`], {
+  await run(uninstaller(), ['/S', '/currentuser', `_?=${installed}`], {
     env,
+    // NSIS requires the final _?= value to extend to end of command line without quotes.
+    windowsVerbatimArguments: true,
     windowsHide: true,
     timeout: 120000,
   });
-  installedByTest = false;
   assert.equal(await ps(registryScript), '', 'Uninstall registration remains.');
   assert.equal(
-    await fs.stat(executable).then(
+    await fs.stat(executable()).then(
       () => true,
       () => false,
     ),
     false,
   );
+  assert.equal(await fs.readFile(sibling, 'utf8'), 'keep');
+  // _?= intentionally retains the in-place test uninstaller. Remove only this fixture file.
+  await fs.rm(uninstaller(), { force: true });
+  installedByTest = false;
 }
 async function open() {
-  app = await electron.launch({ executablePath: executable, args: [], env, timeout: 30000 });
+  app = await electron.launch({ executablePath: executable(), args: [], env, timeout: 30000 });
   const runtime = await app.evaluate(({ app }) => ({
     version: app.getVersion(),
     packaged: app.isPackaged,
@@ -207,6 +229,7 @@ async function preserved(files) {
     assert.deepEqual(await fs.readFile(file), bytes, 'User data changed during installation.');
 }
 try {
+  await assert.rejects(setup(candidate, [`/D=${family}`]), (error) => error.code === 3);
   await setup(previous);
   assert.ok((await ps(registryScript)).includes('present'));
   const first = await open();
@@ -271,7 +294,33 @@ try {
   await remove();
   await preserved(files);
   checks.push('uninstall removes app registration and executable; user data and Agent copies remain');
+  installed = current;
   await setup(candidate);
+  await verifyRegistration(manifest.version);
+  // Exercise a corrupted registration in the disposable fixture hive only.
+  const externalLink = path.join(installed, 'linked-family');
+  await fs.symlink(family, externalLink, 'junction');
+  try {
+    await assert.rejects(remove(), (error) => error.code === 3);
+    assert.equal(await fs.readFile(sibling, 'utf8'), 'keep');
+  } finally {
+    await fs.unlink(externalLink);
+  }
+  const setFixtureLocation = (value) =>
+    ps(
+      `Set-ItemProperty -LiteralPath 'HKCU:\\Software\\${guid}' -Name InstallLocation -Value $env:TSM_LOCATION -ErrorAction Stop`,
+      { TSM_LOCATION: value },
+    );
+  try {
+    await setFixtureLocation(family);
+    await assert.rejects(remove(), (error) => error.code === 3);
+    await fs.access(executable());
+    assert.equal(await fs.readFile(sibling, 'utf8'), 'keep');
+  } finally {
+    await setFixtureLocation(installed);
+  }
+  await setup(candidate);
+  await verifyRegistration(manifest.version);
   const reinstalled = await open();
   assert.equal((await call(reinstalled.page, 'snapshot')).skills.length, 1);
   await close();
@@ -285,6 +334,9 @@ try {
     false,
   );
   checks.push('reinstall recovers existing library; final uninstall removes start menu shortcut');
+  checks.push(
+    'legacy location upgraded in place; fresh default and same-version maintenance verified; shared parent protected',
+  );
   const digest = async (file) =>
     createHash('sha256')
       .update(await fs.readFile(file))

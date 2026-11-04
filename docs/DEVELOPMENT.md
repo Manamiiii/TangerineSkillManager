@@ -49,7 +49,13 @@ npm run dist   # 当前平台的分发文件，禁止自动发布
 
 ## Windows 安装生命周期回归
 
-构建脚本只覆盖测试身份、输出目录和版本，继承正式 `package.json` 的打包策略。不要再把整份 `build` 配置传入程序接口：对象数组会重复合并，导致相同资源被并发复制；`tests/installer-config.test.mjs` 使用真实打包配置解析器回归此边界。
+正式安装器在首次安装时选择当前用户 Programs 下的 `Tangerine/TangerineSkillManager`。已有用户按 HKCU 中同一 GUID 和卸载命令确认旧应用目录及可执行文件后原位升级。登记损坏、目录归属不明或路径经过重解析点时停止维护，保留现场。安装器卸载范围是应用子目录。开始菜单项直接启动该目录的程序，无附加参数，图标来自主程序资源。桌面入口由用户维护。
+
+源码入口 `npm start` 在仓库根目录先构建再执行 `electron .`，`npm run dev` 调用同一入口。产品加载包内界面，无开发服务器端口。Portable 封装器向主程序传递原参数，正式启动使用默认当前用户配置及单实例锁。调试端口和测试 profile 仅用于验收。仓库不含桌面启动器生成任务。保留现有启动命令和便携文件供过渡，新的候选可以构建到独立目录。
+
+`npm run icons` 从本仓库的 SVG 原稿生成 PNG 和 ICO。图稿独立绘制，橙色圆角底、果实轮廓和绿叶延续 Tangerine 系列，中央叠层代表 Skill 库。构建使用已提交的派生文件。要检查 Windows 成品，可将主程序、Setup 和 Portable 的 EXE 路径作为参数传给 `node scripts/audit-icons.mjs`，核对 PE 图标资源各尺寸与 ICO 一致。
+
+构建脚本覆盖测试身份、输出目录、版本和 fixture 专用的 NSIS include。该 include 复用正式安装规则，额外校验隔离的 LocalAppData，并为 0.0.9 fixture 选择旧默认目录。不要再把整份 `build` 配置传入程序接口：对象数组会重复合并，导致相同资源被并发复制；`tests/installer-config.test.mjs` 使用真实打包配置解析器回归此边界。
 
 ```sh
 npm run build

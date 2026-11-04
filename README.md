@@ -30,7 +30,7 @@
 
 当前版本号为 **0.1.0，处于开发阶段**。Windows 构建提供按当前用户安装的 Setup 和免安装 Portable；普通用户暂时没有正式下载包。安装器不需要管理员权限，提供开始菜单入口和 Windows“已安装的应用”卸载入口，不默认创建桌面快捷方式。
 
-安装、升级和卸载前须退出应用，安装器不会强制结束正在运行的程序。升级和卸载保留本地库、配置、安装记录及 Agent 目录中的 Skill 副本；重新安装可继续读取原数据。便携版也使用本机用户数据目录，**不表示把库随 EXE 一起携带**。安装版和便携版属于同一个工具，使用同一份用户数据，不应同时运行。详见 [Windows 安装与验收](docs/WINDOWS_ACCEPTANCE.md)。
+首次安装默认使用 `%LOCALAPPDATA%\Programs\Tangerine\TangerineSkillManager`。此前登记在旧目录的同一应用原位升级。请先退出应用再安装、升级或卸载。升级和卸载保留本地库、配置、安装记录及 Agent 目录中的副本，重装后可继续使用。Portable 和安装版共用本机用户数据，库不会随便携 EXE 移动。详见 [Windows 安装与验收](docs/WINDOWS_ACCEPTANCE.md)。
 
 已经实现的核心功能可供开发者从源码验证，但通过自动测试不等于已经完成产品交付。未来可用版本会在 [GitHub Releases](https://github.com/Manamiiii/TangerineSkillManager/releases) 发布；当前 CI 只构建与测试，不自动上传安装包或创建 Release。
 
@@ -89,6 +89,16 @@ npm start
 默认库位于系统用户数据目录下的 `skill-manager/vault/skills`，支持在设置中修改。示例配置使用 `~`、`{data}` 和 `{workspace}`，无需改成作者的本机目录。[配置、迁移与恢复](docs/CONFIGURATION.md) · [常见问题](docs/FAQ.md)
 
 ## 开发与参与
+
+| 要找什么 | 位置 |
+| --- | --- |
+| 界面、桌面入口、库与同步、共享类型 | [src](src) 下的 ui、desktop、core、shared |
+| 配置契约与内置示例 | [config](config)、[examples](examples) |
+| 架构、数据、安装、验收说明 | [架构](ARCHITECTURE.md)、[专题文档](docs)、[安装交接](docs/WINDOWS_INSTALLER_HANDOFF.md) |
+| 单元与集成测试、桌面与安装测试 | [tests](tests)、[scripts](scripts) 下的 desktop-smoke 和 windows-installer-smoke |
+| 启动、构建和 Windows 安装策略 | [package.json](package.json)、[构建脚本](scripts)、[NSIS 规则](build/installer.nsh) |
+| 图标源与派生资源 | [SVG 原稿](assets/skill-manager.svg)、[生成脚本](scripts/icons.mjs)、[PNG 与多尺寸 ICO](build) |
+| 本地生成的文件（Git 忽略） | `dist/`、`dist-desktop/` 为运行代码，`release/` 下存放候选和 `installer-acceptance/` 测试包，`test-results/` 存放验收报告与截图，`*.log` 为日志 |
 
 使用 Electron + React + TypeScript。Provider、文件系统安全与同步引擎独立于 UI；新增来源不需要改写同步核心。Electron 带来一定包体积，本项目不以极小安装包为目标。
 

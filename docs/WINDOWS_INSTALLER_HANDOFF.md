@@ -1,5 +1,19 @@
 # Windows 安装版交接
 
+## 2026-11-04 当前候选
+
+本地正式身份候选位于 `release/candidate-20261104/`。0.1.0 x64 Setup 为 124,114,521 字节，SHA-256 为 `2ad682ed471dca008488a0aefd35e7b4ed372392cfb7fde19f73090a1ae539ed`。同目录 Portable 为 112,253,144 字节，SHA-256 为 `cb1e0b5e61ad3a9abe9964571cb4e16be5b8dfc3a716a58078dd6250a079dba7`。均未签名，仅供本地验收。
+
+本次从 `357089f` 基线加上本节所在变更构建。正式应用先通过 `npm run dist -- --config.directories.output=release/candidate-20261104` 构建；最终 Setup 使用同一已测 win-unpacked 目录和最终 NSIS 规则重新封装。下文 11 月 3 日的散列仅标识之前的候选。现有启动命令、旧便携文件和用户数据位置继续可用。
+
+本机 68 项测试通过，开发版、正式 win-unpacked 和 Portable 各通过 21 项隔离桌面检查。正式主程序、Setup 与 Portable 的默认 PE 图标组均已提取，每个组的 7 个 PNG 帧与仓库 ICO 逐字节一致。fixture 实测开始菜单的目标、工作目录、空启动参数、图标来源和已安装 EXE 图标。Explorer 的真实桌面图标缓存未验收。
+
+独立身份 fixture 通过 7 组生命周期检查。0.0.9 fixture 使用旧默认目录并原位升级至 0.1.0，全新安装落在隔离用户 Programs 的 Tangerine 产品子目录。验收涵盖同版本覆盖、HKCU 登记、运行中维护拒绝、示例同步、卸载保留和重装恢复。登记指向共享父目录、应用内 junction 指向该父目录时卸载均拒绝，同级文件保留。最终测试安装登记、开始菜单项和主程序均已移除，隔离诊断目录保留。前一天的测试使用临时目录中的 `installed/`，部分旧目录仍有原地卸载模式留下的 fixture 卸载器和诊断数据。
+
+正式身份交互安装、干净 Windows 普通账号及真实历史版本迁移仍待独立环境验收。CI 构建记录与上述本地候选分别追溯。
+
+## 2026-11-03 基线
+
 本轮范围只有 TangerineSkillManager，基于 main 的 `c45a350`；没有修改其他项目或业务数据格式。Windows x64 为当前目标，保留 macOS/Linux 构建结构，不宣称其实际安装已验证。
 
 - 交付：0.1.0 当前用户 NSIS Setup 与 Portable，位于 `release/`。文件大小、SHA-256 和签名状态见 [发布清单](RELEASE_CHECKLIST.md) 与 [验证记录](VALIDATION.md)。本轮不上传安装包、不创建 Release。

@@ -1,5 +1,7 @@
 # 实际验证记录
 
+2026-11-04 Windows 候选的版本、散列、图标提取、安装目录与生命周期结果见 [当前安装版交接](WINDOWS_INSTALLER_HANDOFF.md)。以下按日期保留早期候选记录。
+
 ## 2026-11-03：Windows 安装 CI 修复与候选复验
 
 仅修改本仓库的构建/验收脚本、回归测试与文档，没有改业务、配置或数据格式。`c45a350` 的 [Windows CI](https://github.com/Manamiiii/TangerineSkillManager/actions/runs/41598129678) 在 fixture 构建时因 `EBUSY` 失败：将完整 `build` 配置再次传入 electron-builder 会重复合并对象数组，导致示例资源被并发复制。改为只传测试身份、版本和输出目录的覆盖字段，并通过真实配置解析器测试确保资源、目标及安装策略未重复或丢失。

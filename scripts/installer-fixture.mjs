@@ -15,6 +15,6 @@ export function fixtureOverrides(label, version) {
     productName: fixture.name,
     directories: { output: `release/installer-acceptance/${label}` },
     extraMetadata: { version },
-    nsis: { guid: fixture.guid },
+    nsis: { guid: fixture.guid, include: 'build/installer-fixture.nsh' },
   };
 }

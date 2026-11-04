@@ -46,6 +46,12 @@ jobs:
       - name: Packaged application acceptance (Windows)
         if: runner.os == 'Windows'
         run: npm run test:desktop -- --packaged "${{ github.workspace }}/release/win-unpacked/Tangerine Skill Manager.exe"
+      - name: Verify embedded Windows icons
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          node scripts/audit-icons.mjs "release/win-unpacked/Tangerine Skill Manager.exe" "release/TangerineSkillManager-$version-win-x64-Setup.exe" "release/TangerineSkillManager-$version-win-x64-Portable.exe"
       - name: Installed application lifecycle (Windows)
         if: runner.os == 'Windows'
         shell: pwsh

@@ -9,11 +9,11 @@
 | 项目 | 当前记录 |
 | --- | --- |
 | 版本 / 平台 | 0.1.0 / Windows x64 Setup，另提供 Portable |
-| 本地候选文件 | `release/TangerineSkillManager-0.1.0-win-x64-Setup.exe`（GPL-3.0-only） |
-| 文件大小 | 123,802,132 bytes |
-| SHA-256 | `313f96f445a3968a635d224733cf634afaab4b0f493e2a42f61ace885518cd8a` |
+| 本地候选文件 | `release/candidate-20261104/TangerineSkillManager-0.1.0-win-x64-Setup.exe`（GPL-3.0-only） |
+| 文件大小 | 124,114,521 bytes |
+| SHA-256 | `2ad682ed471dca008488a0aefd35e7b4ed372392cfb7fde19f73090a1ae539ed` |
 | 签名 | 未签名，不能宣传为已签名安装包 |
-| 自动验证 | 68 项测试、正式打包程序 21 项桌面检查、独立安装标识 fixture 的 6 组生命周期回归；不代替正式标识向导和干净机器验收 |
+| 自动验证 | 68 项测试、正式打包程序及 Portable 各 21 项桌面检查、独立身份安装器 7 组生命周期回归、成品 PE 图标校验。完整范围见 [当前候选交接](WINDOWS_INSTALLER_HANDOFF.md) |
 | 真实联网范围 | 此前网络版本：GitHub/SkillsMP 各 20 条结果；Git 发现、导入、commit 来源记录和内容未变检查；版本查询返回暂无正式发行版 |
 | 其他检查 | 类型检查、构建、格式、源码审计、打包运行文件一致性通过 |
 | 证据位置 | [实际验证记录](VALIDATION.md)；`test-results/packaged-result.json`、`test-results/installer-result.json`，按各自产物 hash 区分 |

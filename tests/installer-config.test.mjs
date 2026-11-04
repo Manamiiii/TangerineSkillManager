@@ -14,7 +14,11 @@ test('installer fixtures inherit production policy without duplicate resource co
     expect(effective.extraResources).toEqual(production.extraResources);
     expect(effective.extraResources).toHaveLength(1);
     expect(effective.win.target).toEqual(production.win.target);
-    expect(effective.nsis).toEqual({ ...production.nsis, guid: fixture.guid });
+    expect(effective.nsis).toEqual({
+      ...production.nsis,
+      guid: fixture.guid,
+      include: 'build/installer-fixture.nsh',
+    });
     expect(effective.nsis.perMachine).toBe(false);
     expect(effective.nsis.allowElevation).toBe(false);
     expect(effective.nsis.deleteAppDataOnUninstall).toBe(false);
