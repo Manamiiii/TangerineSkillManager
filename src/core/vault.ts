@@ -17,7 +17,14 @@ export class Vault {
   }
   async list(): Promise<{ skills: Skill[]; warnings: string[] }> {
     const state = await this.store.loadState();
-    if (!(await statOrNull(this.root))) return { skills: [], warnings: [] };
+    if (!(await statOrNull(this.root))) {
+      if (Object.keys(this.records(state)).length)
+        fail(
+          'VAULT_UNAVAILABLE',
+          'The recorded library is unavailable. Reconnect its storage before continuing; no replacement library was created.',
+        );
+      return { skills: [], warnings: [] };
+    }
     await assertNoLinks(this.root);
     const { directories, warnings } = await discoverSkills(this.root, 1),
       skills: Skill[] = [];
@@ -49,6 +56,11 @@ export class Vault {
       state = await this.store.loadState(),
       records = this.records(state),
       prior = records[id];
+    if (Object.keys(records).length && !(await statOrNull(this.root)))
+      fail(
+        'VAULT_UNAVAILABLE',
+        'The recorded library is unavailable. Reconnect its storage before importing.',
+      );
     const exists = await statOrNull(destination);
     if (exists) {
       if (exists.isSymbolicLink()) fail('CONFLICT', 'A symlink occupies this library name.');

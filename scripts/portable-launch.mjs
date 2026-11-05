@@ -13,7 +13,15 @@ export async function launchPortable(executable, env) {
   child.on('error', (error) => {
     launchError = error;
   });
-  const endpoint = path.join(env.APPDATA, 'tangerine-skill-manager', 'DevToolsActivePort');
+  const endpoint = path.join(
+    env.LOCALAPPDATA,
+    'Tangerine',
+    'Data',
+    'TangerineSkillManager',
+    'Cache',
+    'Chromium',
+    'DevToolsActivePort',
+  );
   let browser;
   try {
     const deadline = Date.now() + 45000;

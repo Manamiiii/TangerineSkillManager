@@ -2,6 +2,11 @@
   !error "This include is restricted to the acceptance installer."
 !endif
 
+!if "${VERSION}" == "0.1.0"
+  !searchreplace TSM_PREVIOUS_LEAF "${PRODUCT_FILENAME}" " " ""
+  !define TSM_FRESH_DIR "$LOCALAPPDATA\Programs\Tangerine\${TSM_PREVIOUS_LEAF}"
+!endif
+
 ; Model the previous default without depending on /D command-line quoting.
 !if "${VERSION}" == "0.0.9"
   !define TSM_FRESH_DIR "$LOCALAPPDATA\Programs\${APP_FILENAME}"

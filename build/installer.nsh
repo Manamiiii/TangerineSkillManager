@@ -1,7 +1,7 @@
 ; Keep the application leaf separate from the shared family directory.
 !include LogicLib.nsh
 !searchreplace TSM_LEAF "${PRODUCT_FILENAME}" " " ""
-!define /ifndef TSM_FRESH_DIR "$LOCALAPPDATA\Programs\Tangerine\${TSM_LEAF}"
+!define /ifndef TSM_FRESH_DIR "$LOCALAPPDATA\Tangerine\Apps\${TSM_LEAF}"
 
 !macro refuseMaintenance reason
   !ifmacrodef reportFixtureRefusal
@@ -24,6 +24,7 @@
   ${EndIf}
   ${GetFileName} "$INSTDIR" $R2
   ${If} $INSTDIR != "$LOCALAPPDATA\Programs\Tangerine\${TSM_LEAF}"
+  ${AndIf} $INSTDIR != "$LOCALAPPDATA\Tangerine\Apps\${TSM_LEAF}"
   ${AndIf} $R2 != "${APP_FILENAME}"
     !insertmacro refuseMaintenance app-leaf
   ${EndIf}

@@ -7,15 +7,53 @@ import { publicError } from '../core/errors';
 import type { Commands } from '../shared/types';
 import { AppUpdateChecker } from '../core/app-updates';
 import { externalUrl } from '../core/markets';
+import { windowsLayout, prepareWindowsData, rollbackWindowsData } from './data-layout';
 
 let mainWindow: BrowserWindow | null = null;
 const smoke =
-  !app.isPackaged && process.env.SKILL_MANAGER_TEST_MODE === '1'
+  process.platform !== 'win32' && !app.isPackaged && process.env.SKILL_MANAGER_TEST_MODE === '1'
     ? process.env.SKILL_MANAGER_TEST_ROOT
     : undefined;
 if (smoke) app.setPath('userData', path.join(smoke, 'electron'));
+// Keep the old identity for the Windows named singleton mutex so 0.1.0 and 0.1.1 cannot run together.
+// Switch all Chromium storage paths after taking the mutex, before creating any session/window.
+if (process.platform === 'win32')
+  app.setPath('userData', path.join(app.getPath('appData'), 'tangerine-skill-manager'));
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
+  let layout: ReturnType<typeof prepareWindowsData> | undefined;
+  let startupError: string | undefined;
+  let maintenanceDone = false;
+  if (process.platform === 'win32') {
+    try {
+      const local = process.env.LOCALAPPDATA;
+      if (!local || !path.isAbsolute(local)) throw new Error('DATA_PATH_INVALID');
+      const locations = windowsLayout(local, app.getPath('appData'));
+      if (process.argv.includes('--rollback-data-layout')) {
+        rollbackWindowsData(locations);
+        maintenanceDone = true;
+      } else {
+        layout = prepareWindowsData(locations, process.argv.includes('--migrate-data-layout'));
+        app.setPath('userData', layout.profile);
+        app.setPath('sessionData', layout.session);
+        app.setPath('crashDumps', layout.crash);
+        app.setPath('temp', layout.temp);
+        app.setAppLogsPath(layout.logs);
+      }
+    } catch (error) {
+      const code = (error as Error).message;
+      startupError = /^DATA_[A-Z_]+$/.test(code) ? code : 'DATA_PREPARATION_FAILED';
+    }
+  }
+  // Do not initialize Chromium against the legacy profile when preparation was refused.
+  if (startupError) {
+    dialog.showErrorBox(
+      '本地数据需要检查',
+      `${startupError}\n未打开业务库。请保留现有文件，参考 https://github.com/Manamiiii/TangerineSkillManager/blob/main/docs/DATA_LAYOUT.md 。发现旧数据时，请先退出旧版、备份数据，再显式使用 --migrate-data-layout 启动。中断或冲突时不要删除目录重试。`,
+    );
+    app.exit(1);
+  }
+  if (maintenanceDone) app.exit(0);
   app.on('second-instance', () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
@@ -25,13 +63,15 @@ else {
   app
     .whenReady()
     .then(async () => {
-      const data = smoke
-        ? path.join(smoke, 'data')
-        : process.platform === 'linux'
-          ? process.env.XDG_DATA_HOME && path.isAbsolute(process.env.XDG_DATA_HOME)
-            ? process.env.XDG_DATA_HOME
-            : path.join(os.homedir(), '.local', 'share')
-          : app.getPath('appData');
+      const data =
+        layout?.data ??
+        (smoke
+          ? path.join(smoke, 'data')
+          : process.platform === 'linux'
+            ? process.env.XDG_DATA_HOME && path.isAbsolute(process.env.XDG_DATA_HOME)
+              ? process.env.XDG_DATA_HOME
+              : path.join(os.homedir(), '.local', 'share')
+            : app.getPath('appData'));
       const exampleDirectory = app.isPackaged
         ? path.join(process.resourcesPath, 'examples', 'clear-plan')
         : path.join(__dirname, '../examples/clear-plan');
@@ -40,6 +80,7 @@ else {
         smoke ? path.join(smoke, 'home') : os.homedir(),
         undefined,
         exampleDirectory,
+        layout,
       );
       let updates = new AppUpdateChecker(app.getVersion(), service.jsonClient);
       let updateDns = 'system';

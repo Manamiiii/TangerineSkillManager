@@ -11,11 +11,15 @@ import { packagedEnvironment } from './packaged-environment.mjs';
 import { fixture } from './installer-fixture.mjs';
 
 assert.equal(process.platform, 'win32');
-const [candidateArgument, previousArgument] = process.argv.slice(2);
-assert.ok(candidateArgument && previousArgument, 'Pass candidate Setup.exe and older fixture Setup.exe.');
+const [candidateArgument, previousArgument, familyArgument] = process.argv.slice(2);
+assert.ok(
+  candidateArgument && previousArgument && familyArgument,
+  'Pass candidate and both older fixture Setup.exe paths.',
+);
 const candidate = path.resolve(candidateArgument),
-  previous = path.resolve(previousArgument);
-for (const file of [candidate, previous]) {
+  previous = path.resolve(previousArgument),
+  previousFamily = path.resolve(familyArgument);
+for (const file of [candidate, previous, previousFamily]) {
   assert.ok(
     file.startsWith(path.resolve('release/installer-acceptance') + path.sep),
     'Only isolated acceptance fixture packages are allowed.',
@@ -43,7 +47,7 @@ async function ps(script, extra = {}) {
   ).stdout.trim();
 }
 // Check the actual installer identity before it can touch any registry key or installation.
-for (const file of [candidate, previous]) {
+for (const file of [candidate, previous, previousFamily]) {
   const product = await ps(
     `(Get-Item -LiteralPath $env:TSM_TEST_SETUP -ErrorAction Stop).VersionInfo.ProductName`,
     { TSM_TEST_SETUP: file },
@@ -79,8 +83,9 @@ assert.equal(
   '0',
 );
 const programs = path.join(env.LOCALAPPDATA, 'Programs');
-const family = path.join(programs, 'Tangerine');
+const family = path.join(env.LOCALAPPDATA, 'Tangerine', 'Apps');
 const legacy = path.join(programs, fixture.name);
+const legacyFamily = path.join(programs, 'Tangerine', fixture.name.replaceAll(' ', ''));
 const current = path.join(family, fixture.name.replaceAll(' ', ''));
 let installed = legacy;
 await fs.mkdir(family, { recursive: true });
@@ -155,14 +160,14 @@ async function verifyInstalledPayload(setupFile) {
   );
 }
 async function setup(file, args = []) {
-  assert.ok([legacy, current].includes(installed) && installed.startsWith(root + path.sep));
+  assert.ok([legacy, legacyFamily, current].includes(installed) && installed.startsWith(root + path.sep));
   await run(file, ['/S', '/currentuser', ...args], { env, windowsHide: true, timeout: 120000 });
   installedByTest = true;
   await fs.access(executable());
   await verifyInstalledPayload(file);
 }
 async function remove() {
-  assert.ok([legacy, current].includes(installed) && installed.startsWith(root + path.sep));
+  assert.ok([legacy, legacyFamily, current].includes(installed) && installed.startsWith(root + path.sep));
   // _?= executes the uninstaller in place so the exit code covers the actual operation.
   await run(uninstaller(), ['/S', '/currentuser', `_?=${installed}`], {
     env,
@@ -239,9 +244,11 @@ try {
   const snapshot = await call(first.page, 'snapshot');
   assert.equal(
     normalize(snapshot.configPath),
-    normalize(path.join(env.APPDATA, 'skill-manager', 'config.json')),
+    normalize(
+      path.join(env.LOCALAPPDATA, 'Tangerine', 'Data', 'TangerineSkillManager', 'Config', 'config.json'),
+    ),
   );
-  assert.ok(normalize(snapshot.vaultPath).startsWith(normalize(env.APPDATA) + path.sep));
+  assert.ok(normalize(snapshot.vaultPath).startsWith(normalize(env.LOCALAPPDATA) + path.sep));
   const target = path.join(root, 'target');
   await fs.mkdir(target);
   await fs.writeFile(path.join(target, 'keep.txt'), 'unmanaged neighbor');
@@ -266,7 +273,7 @@ try {
   const files = await Promise.all(
     [
       snapshot.configPath,
-      path.join(path.dirname(snapshot.configPath), 'state.json'),
+      path.join(path.dirname(path.dirname(snapshot.configPath)), 'Storage', 'state.json'),
       path.join(snapshot.vaultPath, 'clear-plan', 'SKILL.md'),
       path.join(target, 'clear-plan', 'SKILL.md'),
       path.join(target, 'keep.txt'),
@@ -294,6 +301,14 @@ try {
   await remove();
   await preserved(files);
   checks.push('uninstall removes app registration and executable; user data and Agent copies remain');
+  installed = legacyFamily;
+  await setup(previousFamily);
+  await verifyRegistration('0.1.0');
+  await setup(candidate);
+  await verifyRegistration(manifest.version);
+  await preserved(files);
+  await remove();
+  checks.push('previous Programs/Tangerine directory upgraded in place; data preserved');
   installed = current;
   await setup(candidate);
   await verifyRegistration(manifest.version);
@@ -353,6 +368,7 @@ try {
         sha256: await digest(candidate),
         previous: path.basename(previous),
         previousSha256: await digest(previous),
+        previousFamilySha256: await digest(previousFamily),
         checks,
         limitation:
           'Host system with isolated application profile and test application identity, not a clean Windows VM. Both fixtures use the release installer policy and current code; the older fixture has an older version number. Production-identity installer UI still needs manual acceptance.',

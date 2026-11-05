@@ -81,7 +81,7 @@ export class SkillUpdates {
       JSON.stringify(current.source) !== prepared.previousSource
     )
       fail('CHANGED', '配置、来源记录或本地内容已变化，请重新预览更新。');
-    const cache = path.join(vault.store.directory, 'update-staging');
+    const cache = vault.store.updateCache;
     const staged = await stageTree(cache, prepared.files);
     try {
       if ((await readSkill(staged, plan.skillId)).hash !== plan.latestHash)

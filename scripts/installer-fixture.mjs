@@ -8,7 +8,7 @@ export const fixture = {
 // electron-builder merges these overrides into package.json automatically.
 // Never repeat the full build config here: object arrays are concatenated, not deduplicated by value.
 export function fixtureOverrides(label, version) {
-  if (!['previous', 'current'].includes(label) || !/^\d+\.\d+\.\d+$/.test(version))
+  if (!['previous', 'previous-family', 'current'].includes(label) || !/^\d+\.\d+\.\d+$/.test(version))
     throw new Error('Invalid installer fixture label or version');
   return {
     appId: fixture.appId,

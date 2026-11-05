@@ -8,12 +8,12 @@
 
 | 项目 | 当前记录 |
 | --- | --- |
-| 版本 / 平台 | 0.1.0 / Windows x64 Setup，另提供 Portable |
-| 本地候选文件 | `release/candidate-20261104/TangerineSkillManager-0.1.0-win-x64-Setup.exe`（GPL-3.0-only） |
-| 文件大小 | 124,114,521 bytes |
-| SHA-256 | `2ad682ed471dca008488a0aefd35e7b4ed372392cfb7fde19f73090a1ae539ed` |
+| 版本 / 平台 | 0.1.1 / Windows x64 Setup，另提供 Portable |
+| 本地候选文件 | `release/candidate-20261105-final/TangerineSkillManager-0.1.1-win-x64-Setup.exe`（GPL-3.0-only） |
+| 文件大小 | 124,067,494 bytes |
+| SHA-256 | `69fcbf5a4d01b3ad313ff8523d7295ca8c97ee6f8a308e56b071e4d869c5e518` |
 | 签名 | 未签名，不能宣传为已签名安装包 |
-| 自动验证 | 68 项测试、正式打包程序及 Portable 各 21 项桌面检查、独立身份安装器 7 组生命周期回归、成品 PE 图标校验。完整范围见 [当前候选交接](WINDOWS_INSTALLER_HANDOFF.md) |
+| 自动验证 | 80 项测试、正式打包程序及 Portable 各 21 项桌面检查、4 组实际 Electron 迁移检查、独立身份安装器 8 组生命周期回归、成品 PE 图标校验。完整范围见 [当前候选交接](WINDOWS_INSTALLER_HANDOFF.md) |
 | 真实联网范围 | 此前网络版本：GitHub/SkillsMP 各 20 条结果；Git 发现、导入、commit 来源记录和内容未变检查；版本查询返回暂无正式发行版 |
 | 其他检查 | 类型检查、构建、格式、源码审计、打包运行文件一致性通过 |
 | 证据位置 | [实际验证记录](VALIDATION.md)；`test-results/packaged-result.json`、`test-results/installer-result.json`，按各自产物 hash 区分 |
@@ -32,7 +32,7 @@
 | P1 | 实际 Windows 版本及架构声明 | 只声明测试过的环境；不要推断整个 Windows 支持范围 | 维护者 |
 | P2 | Windows 代码签名 | 尚未配置；可明确标注未签名的小范围候选，是否如此发布由作者决定；安全软件阻止普通启动时须记录为发行体验问题 | 作者决定，维护者配置 |
 | P2 | Agent 实际加载与调用 | 模板和文件同步已测试；未逐一运行 Agent。未验证前保留 README 限制，不宣传“全面兼容” | 对应 Agent 环境的维护者 |
-| P1 | 打包工具依赖告警 | 当前全依赖审计有 15 个 moderate 项，生产依赖审计为 0；已确认来自单一 minimatch 公告，暂无受支持的低风险修复路径，详见 [依赖复核及后续条件](DEPENDENCY_REVIEW.md) | 维护者 |
+| P1 | 打包工具依赖告警 | 2026-11-05 全依赖审计有 6 个 moderate 项，生产依赖审计为 0；已确认来自单一 minimatch 公告，暂无受支持的低风险修复路径，详见 [依赖复核及后续条件](DEPENDENCY_REVIEW.md) | 维护者 |
 | 后续平台 | macOS/Linux、WSL、远程或云端 Agent | macOS/Linux CI 的测试、开发版桌面流程和打包已通过；实机安装、WSL、远程或云端 Agent 未验证 | 后续平台工作 |
 
 发现数据丢失、误删、权限绕过或无法完成本地核心任务时，暂停该候选发布。外部市场限流/临时故障应记录独立失败，核实不影响本地核心任务，不把网络失败写成成功。

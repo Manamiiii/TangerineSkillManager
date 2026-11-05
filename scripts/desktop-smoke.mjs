@@ -36,7 +36,7 @@ if (process.platform === 'win32') env.PATH = '';
 let app;
 try {
   await fs.mkdir('test-results', { recursive: true });
-  if (packagedExecutable) env = await packagedEnvironment(root, electronPath);
+  if (process.platform === 'win32') env = await packagedEnvironment(root, electronPath);
   console.log('Profile preflight complete; launching application.');
   app = portable
     ? await launchPortable(packagedExecutable, env)
@@ -47,15 +47,27 @@ try {
         timeout: 30_000,
       });
   app.process().stderr.on('data', (chunk) => process.stderr.write(chunk));
-  if (packagedExecutable && !portable) {
+  if (process.platform === 'win32' && !portable) {
     const runtime = await app.evaluate(({ app }) => ({
       packaged: app.isPackaged,
       appData: app.getPath('appData'),
       home: process.getBuiltinModule('os').homedir(),
+      profile: app.getPath('userData'),
+      session: app.getPath('sessionData'),
+      logs: app.getPath('logs'),
+      temp: app.getPath('temp'),
     }));
-    expect(runtime.packaged).toBe(true);
+    expect(runtime.packaged).toBe(!!packagedExecutable);
     expect(path.resolve(runtime.appData).toLowerCase()).toBe(path.resolve(env.APPDATA).toLowerCase());
     expect(path.resolve(runtime.home).toLowerCase()).toBe(path.resolve(root, 'home').toLowerCase());
+    const dataRoot = path.join(env.LOCALAPPDATA, 'Tangerine', 'Data', 'TangerineSkillManager');
+    for (const [key, relative] of Object.entries({
+      profile: 'Storage/Electron',
+      session: 'Cache/Chromium',
+      logs: 'Logs',
+      temp: 'Temp',
+    }))
+      expect(path.resolve(runtime[key]).toLowerCase()).toBe(path.resolve(dataRoot, relative).toLowerCase());
   }
   const page = await app.firstWindow();
   console.log('Application window connected.');
@@ -63,12 +75,21 @@ try {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await expect(page.getByRole('heading', { name: '你的 Skill，本地掌控。' })).toBeVisible();
-  if (packagedExecutable) {
+  if (process.platform === 'win32') {
     const snapshot = await page.evaluate(() => window.skillManager.request('snapshot', undefined));
     expect(snapshot.ok).toBe(true);
     expect(path.dirname(snapshot.value.configPath).toLowerCase()).toBe(
-      path.join(env.APPDATA, 'skill-manager').toLowerCase(),
+      path.join(env.LOCALAPPDATA, 'Tangerine', 'Data', 'TangerineSkillManager', 'Config').toLowerCase(),
     );
+    // A getter alone cannot prove Chromium did not write through the legacy lock identity.
+    expect(
+      (
+        await fs.readdir(path.join(env.APPDATA, 'tangerine-skill-manager')).catch((error) => {
+          if (error.code === 'ENOENT') return [];
+          throw error;
+        })
+      ).filter((name) => name !== 'lockfile'),
+    ).toEqual([]);
   }
   expect(
     await page.evaluate(() => ({ node: typeof window.require, bridge: typeof window.skillManager?.request })),
@@ -320,17 +341,19 @@ try {
     throw new Error('Invalid cleanup scope');
   // Native input methods may create locked files inside a redirected Windows profile.
   // Remove only our test data, leaving host-managed caches to the operating system.
-  const cleanup = packagedExecutable
-    ? [
-        'source',
-        'project',
-        'home/agent-skills',
-        'home/AppData/Roaming/skill-manager',
-        'home/AppData/Roaming/tangerine-skill-manager',
-        'probe.cjs',
-        'environment-probe.json',
-      ].map((relative) => path.join(root, relative))
-    : [root];
+  const cleanup =
+    process.platform === 'win32'
+      ? [
+          'source',
+          'project',
+          'home/agent-skills',
+          'home/AppData/Roaming/skill-manager',
+          'home/AppData/Roaming/tangerine-skill-manager',
+          'home/AppData/Local/Tangerine/Data/TangerineSkillManager',
+          'probe.cjs',
+          'environment-probe.json',
+        ].map((relative) => path.join(root, relative))
+      : [root];
   for (const entry of cleanup)
     await fs
       .rm(entry, { recursive: true, force: true })

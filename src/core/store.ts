@@ -61,21 +61,47 @@ export function migrateConfig(raw: unknown): { config: Config; migrated: boolean
 export class Store {
   readonly configPath: string;
   readonly statePath: string;
-  constructor(readonly directory: string) {
+  constructor(
+    readonly directory: string,
+    private options: {
+      storage?: string;
+      backups?: string;
+      logs?: string;
+      defaultVault?: string;
+      root?: string;
+      cache?: string;
+    } = {},
+  ) {
     this.configPath = path.join(directory, 'config.json');
-    this.statePath = path.join(directory, 'state.json');
+    this.statePath = path.join(options.storage ?? directory, 'state.json');
+  }
+  get protectedRoot() {
+    return this.options.root ?? this.directory;
+  }
+  get updateCache() {
+    return path.join(this.options.cache ?? this.directory, 'update-staging');
   }
   async backup(filename: string): Promise<string | undefined> {
     await assertNoLinks(filename);
     if (!(await statOrNull(filename))) return;
-    const backup = `${filename}.backup-${Date.now()}-${Math.random().toString(36).slice(2)}.json`;
+    const backup = path.join(
+      this.options.backups ?? path.dirname(filename),
+      `${path.basename(filename)}.backup-${Date.now()}-${Math.random().toString(36).slice(2)}.json`,
+    );
+    await assertNoLinks(backup);
+    await fs.mkdir(path.dirname(backup), { recursive: true });
     await fs.copyFile(filename, backup, fs.constants.COPYFILE_EXCL);
     return backup;
   }
   async loadConfig(): Promise<Config> {
     await assertNoLinks(this.configPath);
     if (!(await statOrNull(this.configPath))) {
-      const c = defaultConfig();
+      if (await statOrNull(this.statePath))
+        fail(
+          'CONFIG_MISSING',
+          'Configuration is missing but ownership records exist. Restore the configuration backup before continuing.',
+        );
+      const c = this.defaults();
       await atomicJson(this.configPath, c);
       return c;
     }
@@ -102,7 +128,7 @@ export class Store {
   }
   async reset(): Promise<Config> {
     await this.backup(this.configPath);
-    const c = defaultConfig();
+    const c = this.defaults();
     await atomicJson(this.configPath, c);
     return c;
   }
@@ -126,11 +152,17 @@ export class Store {
   async log(code: string): Promise<void> {
     // Never serialize an Error, user path, provider URL, or arbitrary message.
     const event = /^[A-Z_]{1,50}$/.test(code) ? code : 'UNKNOWN';
-    const filename = path.join(this.directory, 'events.log');
+    const filename = path.join(this.options.logs ?? this.directory, 'events.log');
     await assertNoLinks(filename);
+    await fs.mkdir(path.dirname(filename), { recursive: true });
     const st = await statOrNull(filename);
     if (st && (!st.isFile() || st.nlink > 1)) return;
     if (st && st.size > 256 * 1024) await fs.writeFile(filename, '', { mode: 0o600 });
     await fs.appendFile(filename, `${new Date().toISOString()} ${event}\n`, { mode: 0o600 });
+  }
+  private defaults(): Config {
+    const config = defaultConfig();
+    if (this.options.defaultVault) config.vault.root = this.options.defaultVault;
+    return config;
   }
 }

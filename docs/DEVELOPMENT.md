@@ -49,7 +49,9 @@ npm run dist   # 当前平台的分发文件，禁止自动发布
 
 ## Windows 安装生命周期回归
 
-正式安装器在首次安装时选择当前用户 Programs 下的 `Tangerine/TangerineSkillManager`。已有用户按 HKCU 中同一 GUID 和卸载命令确认旧应用目录及可执行文件后原位升级。登记损坏、目录归属不明或路径经过重解析点时停止维护，保留现场。安装器卸载范围是应用子目录。开始菜单项直接启动该目录的程序，无附加参数，图标来自主程序资源。桌面入口由用户维护。
+正式安装器在首次安装时选择 `%LOCALAPPDATA%/Tangerine/Apps/TangerineSkillManager`。已有用户按 HKCU 中同一 GUID 和卸载命令确认旧应用目录及可执行文件后原位升级，包括上一轮 Programs/Tangerine 目录。登记损坏、目录归属不明或路径经过重解析点时停止维护，保留现场。安装器卸载范围是应用子目录。开始菜单项直接启动该目录的程序，无附加参数，图标来自主程序资源。桌面入口由用户维护。
+
+Windows 所有入口的新数据、Electron profile/cache/log/temp 均进入本项目 Data 空间。旧数据必须显式迁移，兼容路径及例外见 [目录契约](DATA_LAYOUT.md)。`npm run test:layout -- '<正式 win-unpacked EXE 路径>'` 使用虚构旧配置和 copy/junction 安装，实际检查 Electron 新旧单实例排斥、迁移和重开恢复。Windows CI 同样执行该检查。
 
 源码入口 `npm start` 在仓库根目录先构建再执行 `electron .`，`npm run dev` 调用同一入口。产品加载包内界面，无开发服务器端口。Portable 封装器向主程序传递原参数，正式启动使用默认当前用户配置及单实例锁。调试端口和测试 profile 仅用于验收。仓库不含桌面启动器生成任务。保留现有启动命令和便携文件供过渡，新的候选可以构建到独立目录。
 
@@ -60,7 +62,7 @@ npm run dist   # 当前平台的分发文件，禁止自动发布
 ```sh
 npm run build
 npm run build:installer-fixtures
-npm run test:installer -- release/installer-acceptance/current/TangerineSkillManager-0.1.0-win-x64-Setup.exe release/installer-acceptance/previous/TangerineSkillManager-0.0.9-win-x64-Setup.exe
+npm run test:installer -- release/installer-acceptance/current/TangerineSkillManager-0.1.1-win-x64-Setup.exe release/installer-acceptance/previous/TangerineSkillManager-0.0.9-win-x64-Setup.exe release/installer-acceptance/previous-family/TangerineSkillManager-0.1.0-win-x64-Setup.exe
 ```
 
 fixture 使用正式安装策略、相同应用代码与独立应用名称/GUID，避免影响正在运行的个人版本。旧版本 fixture 仅将版本号设为 0.0.9，用于验证安装器升级，不冒充历史业务数据迁移测试。实际安装到临时目录，临时写入测试应用的 HKCU 卸载登记和开始菜单入口，结束时卸载；检测到已有测试登记或同名快捷方式时拒绝覆盖。用户配置、库和同步目录都在隔离的临时 profile；不关闭用户已有程序，不读取真实 Skill 库。

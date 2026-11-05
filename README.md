@@ -28,9 +28,11 @@
 
 ## 当前状态
 
-当前版本号为 **0.1.0，处于开发阶段**。Windows 构建提供按当前用户安装的 Setup 和免安装 Portable；普通用户暂时没有正式下载包。安装器不需要管理员权限，提供开始菜单入口和 Windows“已安装的应用”卸载入口，不默认创建桌面快捷方式。
+当前版本号为 **0.1.1，处于开发阶段**。Windows 构建提供按当前用户安装的 Setup 和免安装 Portable；普通用户暂时没有正式下载包。安装器不需要管理员权限，提供开始菜单入口和 Windows“已安装的应用”卸载入口，不默认创建桌面快捷方式。
 
-首次安装默认使用 `%LOCALAPPDATA%\Programs\Tangerine\TangerineSkillManager`。此前登记在旧目录的同一应用原位升级。请先退出应用再安装、升级或卸载。升级和卸载保留本地库、配置、安装记录及 Agent 目录中的副本，重装后可继续使用。Portable 和安装版共用本机用户数据，库不会随便携 EXE 移动。详见 [Windows 安装与验收](docs/WINDOWS_ACCEPTANCE.md)。
+首次安装默认使用 `%LOCALAPPDATA%\Tangerine\Apps\TangerineSkillManager`，新数据使用同一根下的 `Data\TangerineSkillManager`。此前登记在旧目录的同一应用原位升级。请先退出应用再安装、升级或卸载。升级和卸载保留本地库、配置、安装记录及 Agent 目录中的副本，重装后可继续使用。Portable、安装版和源码入口共用本机用户数据，库不会随便携 EXE 移动。详见 [Windows 安装与验收](docs/WINDOWS_ACCEPTANCE.md)。
+
+**已有 0.1.0 数据的用户**首次打开会收到迁移提示，不会自动搬动真实库。请先备份并按 [目录迁移与恢复](docs/DATA_LAYOUT.md) 显式迁移配置和安装记录。旧库与同步目标保持原位置，旧版写入被阻挡；发现冲突会保留现场，不创建替代空库。
 
 已经实现的核心功能可供开发者从源码验证，但通过自动测试不等于已经完成产品交付。未来可用版本会在 [GitHub Releases](https://github.com/Manamiiii/TangerineSkillManager/releases) 发布；当前 CI 只构建与测试，不自动上传安装包或创建 Release。
 
@@ -86,7 +88,7 @@ npm start
 - 默认使用系统 DNS。若网络将公开域名解析到私网/保留地址，连接会被阻止；可选择本地导入，或了解 [可选 HTTPS DNS 及其隐私说明](docs/CONFIGURATION.md#网络连接)。
 - 同步保护不代替备份。使用陌生 Skill 前请阅读内容，Agent 执行其中指令的风险不由文件管理工具消除。[安全边界](SECURITY.md)
 
-默认库位于系统用户数据目录下的 `skill-manager/vault/skills`，支持在设置中修改。示例配置使用 `~`、`{data}` 和 `{workspace}`，无需改成作者的本机目录。[配置、迁移与恢复](docs/CONFIGURATION.md) · [常见问题](docs/FAQ.md)
+Windows 新库默认位于 `%LOCALAPPDATA%/Tangerine/Data/TangerineSkillManager/Storage/vault/skills`，支持在设置中修改。macOS/Linux 保持系统用户数据目录下的 `skill-manager/vault/skills`。路径模板支持 `~`、`{data}` 和 `{workspace}`，无需改源码适配用户名。[完整目录地图和旧数据保护](docs/DATA_LAYOUT.md) · [配置、迁移与恢复](docs/CONFIGURATION.md) · [常见问题](docs/FAQ.md)
 
 ## 开发与参与
 

@@ -6,13 +6,14 @@ JSON Schema：[config/schema.json](../config/schema.json)。可移植默认配�
 
 | 系统 | `{data}` 基目录 |
 | --- | --- |
-| Windows | 系统用户 AppData（Roaming）目录 |
+| Windows 新数据 | `%LOCALAPPDATA%/Tangerine/Data/TangerineSkillManager/Storage` |
+| Windows 迁移旧数据 | 原系统用户 AppData（Roaming）目录，保留旧模板含义 |
 | macOS | `~/Library/Application Support` |
 | Linux | `$XDG_DATA_HOME`，未设置时 `~/.local/share` |
 
-默认库为 `{data}/skill-manager/vault/skills`；`config.json`、`state.json`、备份和脱敏事件日志在 `{data}/skill-manager`。Electron 自身的窗口/缓存数据使用其标准 userData 目录。应用 UI 显示当前配置和库的实际路径。
+Windows 新库为 `{data}/vault/skills`；配置、记录、备份、日志和 Electron profile 按用途进入独立目录，见 [完整目录地图与迁移](DATA_LAYOUT.md)。Windows 迁移用户的旧库和模板上下文不变。macOS/Linux 默认库仍为 `{data}/skill-manager/vault/skills`，配置/记录/备份/日志在 `{data}/skill-manager`，Electron 使用原有标准目录。应用 UI 显示当前配置和库的实际路径。
 
-顶层配置字段：`version: 1`、`vault.root`、`defaultSyncMode`、`agents[]`、`projects[]`、`providers[]`，以及可选的 `network.dns`。目录支持 `~`、`$HOME`、`${HOME}`、`%USERPROFILE%`、`{workspace}`、`{data}`。相对路径相对于配置目录；项目模板的相对路径相对于项目根。拒绝 `..`、网络/设备路径和当前系统无法解释的其他平台绝对路径。
+顶层配置字段：`version: 1`、`vault.root`、`defaultSyncMode`、`agents[]`、`projects[]`、`providers[]`，以及可选的 `network.dns`。目录支持 `~`、`$HOME`、`${HOME}`、`%USERPROFILE%`、`{workspace}`、`{data}`。相对路径通常相对于配置目录；迁移后的 Windows 配置仍以旧业务目录为基准，避免更改原来指向的位置。项目模板的相对路径相对于项目根。拒绝 `..`、网络/设备路径和当前系统无法解释的其他平台绝对路径。
 
 修改库目录会切换库，不自动搬移旧内容。迁移 v0、保存和恢复默认前保留备份；损坏/未来版本配置不会静默覆盖。损坏所有权记录会阻止写入，请恢复 `state.json.backup-*.json`，不要删除记录来强制覆盖目标。
 

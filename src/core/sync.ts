@@ -128,7 +128,7 @@ export class SyncEngine {
           targetFingerprint: 'unavailable',
         };
         try {
-          await assertWritableTarget(target, targets, config, this.ctx, this.store.directory);
+          await assertWritableTarget(target, targets, config, this.ctx, this.store.protectedRoot);
           item.targetFingerprint = await fingerprint(dest);
           await this.checkReadOnlyCollision(skillId, target, targets);
           if (
@@ -222,7 +222,7 @@ export class SyncEngine {
           out.message = item.reason;
         } else {
           const target = targets.find((t) => t.id === item.targetId)!;
-          await assertWritableTarget(target, targets, config, this.ctx, this.store.directory);
+          await assertWritableTarget(target, targets, config, this.ctx, this.store.protectedRoot);
           await this.checkReadOnlyCollision(item.skillId, target, targets);
           const skill = await this.vault.get(item.skillId);
           if (

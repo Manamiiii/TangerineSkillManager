@@ -65,18 +65,32 @@ export class ApplicationService {
     home: string,
     providers?: ProviderRegistry,
     private exampleDirectory?: string,
+    layout?: {
+      root: string;
+      config: string;
+      storage: string;
+      backups: string;
+      logs: string;
+      cache: string;
+      base: string;
+      defaultVault: string;
+    },
   ) {
-    this.store = new Store(path.join(data, 'skill-manager'));
+    this.store = new Store(layout?.config ?? path.join(data, 'skill-manager'), layout);
     this.resolveNetwork = async (host, signal) =>
       resolvePublic(host, signal, (await this.store.loadConfig()).network?.dns);
     this.jsonClient = createPublicJson(this.resolveNetwork);
     this.markets = this.makeMarkets();
-    this.ctx = { data, home, base: this.store.directory };
+    this.ctx = { data, home, base: layout?.base ?? this.store.directory };
     this.providers = providers ?? new ProviderRegistry();
     if (!providers) {
       this.providers.register(new LocalFolderProvider(this.ctx));
       this.providers.register(
-        new GitProvider(path.join(this.store.directory, 'cache'), undefined, this.resolveNetwork),
+        new GitProvider(
+          layout?.cache ?? path.join(this.store.directory, 'cache'),
+          undefined,
+          this.resolveNetwork,
+        ),
       );
     }
   }
@@ -104,10 +118,12 @@ export class ApplicationService {
       await this.store.log('OPERATION_COMPLETE').catch(() => {});
       return value;
     });
-    this.queue = run.catch(async () => {
+    const completed = run.catch(async (error) => {
       await this.store.log('OPERATION_FAILED').catch(() => {});
+      throw error;
     });
-    return run as Promise<Commands[K]['output']>;
+    this.queue = completed.catch(() => {});
+    return completed as Promise<Commands[K]['output']>;
   }
   private async snapshot(config?: Config): Promise<Snapshot> {
     const c = config ?? (await this.store.loadConfig()),
@@ -161,7 +177,7 @@ export class ApplicationService {
   private async validateVaultRoot(c: Config): Promise<void> {
     const vault = expandPath(c.vault.root, this.ctx);
     await assertNoLinks(vault);
-    if (contains(vault, this.store.directory) || identity(vault) === identity(this.ctx.home))
+    if (contains(vault, this.store.protectedRoot) || identity(vault) === identity(this.ctx.home))
       fail('INVALID_VAULT', 'Choose a dedicated library subdirectory, not the home or app state root.');
   }
   private async validateConfigPaths(c: Config): Promise<void> {

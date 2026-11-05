@@ -46,6 +46,9 @@ jobs:
       - name: Packaged application acceptance (Windows)
         if: runner.os == 'Windows'
         run: npm run test:desktop -- --packaged "${{ github.workspace }}/release/win-unpacked/Tangerine Skill Manager.exe"
+      - name: Data layout and legacy coexistence (Windows)
+        if: runner.os == 'Windows'
+        run: npm run test:layout -- "${{ github.workspace }}/release/win-unpacked/Tangerine Skill Manager.exe"
       - name: Verify embedded Windows icons
         if: runner.os == 'Windows'
         shell: pwsh
@@ -57,6 +60,6 @@ jobs:
         shell: pwsh
         run: |
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          npm run test:installer -- "release/installer-acceptance/current/TangerineSkillManager-$version-win-x64-Setup.exe" "release/installer-acceptance/previous/TangerineSkillManager-0.0.9-win-x64-Setup.exe"
+          npm run test:installer -- "release/installer-acceptance/current/TangerineSkillManager-$version-win-x64-Setup.exe" "release/installer-acceptance/previous/TangerineSkillManager-0.0.9-win-x64-Setup.exe" "release/installer-acceptance/previous-family/TangerineSkillManager-0.1.0-win-x64-Setup.exe"
       - run: npm run checksums
       # Build and test only. Do not upload installers, profiles or reports from this public repository.

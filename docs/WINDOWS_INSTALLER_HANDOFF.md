@@ -1,6 +1,29 @@
 # Windows 安装版交接
 
-## 2026-11-04 当前候选
+## 2026-11-05 当前候选
+
+本轮基线为 main `ae7885e`，工作区起始干净，远端一致。0.1.1 正式身份本地候选从本节所在代码变更构建，位于 `release/candidate-20261105-final/`。旧包保留，不创建 Release、不上传二进制，仍未签名。
+
+| 产物 | 大小（bytes） | SHA-256 |
+| --- | --- | --- |
+| TangerineSkillManager-0.1.1-win-x64-Setup.exe | 124,067,494 | `69fcbf5a4d01b3ad313ff8523d7295ca8c97ee6f8a308e56b071e4d869c5e518` |
+| TangerineSkillManager-0.1.1-win-x64-Portable.exe | 112,270,789 | `102bacb59682eead39d99acc19d1cf5bd492890d9aec3cab3947ba43bb3145ab` |
+
+新装程序为 `%LOCALAPPDATA%/Tangerine/Apps/TangerineSkillManager`；新自管数据为同根 `Data/TangerineSkillManager`。旧登记原位维护，旧业务数据通过显式、可恢复的配置/记录迁移衔接，保留旧库和目标。目录地图、旧版阻挡、回退限制及系统例外见 [DATA_LAYOUT.md](DATA_LAYOUT.md)。真实库、现有 Portable、正式安装登记和日常快捷方式均未操作。
+
+实际验证层级如下。
+
+- 源码通过 80 项测试（9 文件）、schema、格式、类型检查、构建和源码/暂存区隐私检查。
+- 开发 Electron、正式 win-unpacked、Portable 各通过 21 项隔离桌面检查。新增断言核对真实配置/profile/session/log/temp 位置，并确认旧 profile 路径只允许兼容 lockfile。Portable 调试端点实际在 sessionData 下，测试已据此调整并重新通过。
+- 正式 win-unpacked 通过 4 组迁移运行时检查，使用实际 Electron 预检隔离环境。虚构旧库含 copy 与 junction 副本，迁移后保持原路径、字节和归属，重复预览跳过，退出重开恢复。真实旧身份锁阻挡迁移、新版也阻挡旧身份并行启动。该测试不是实际用户历史库验收。
+- 独立名称/GUID 安装 fixture 通过 8 组生命周期。旧 Programs、旧 Programs/Tangerine 原位升级，新 Tangerine/Apps 安装/同版本覆盖、运行中拒绝维护、卸载保留、重装恢复、共享父目录/链接保护及开始菜单归属均已实测。fixture 旧版本使用当前代码，只证明安装器版本行为。
+- 正式包 8 个运行/许可文件与当前构建输入一致，正式主程序、Setup、Portable 的 7 帧图标各自匹配。Setup 本身仅构建和检查资源/签名/hash，未在用户主机执行正式身份安装。
+
+完整依赖审计现为 6 项 moderate、生产依赖 0 项，详见 [依赖复核](DEPENDENCY_REVIEW.md)，没有强制升级或降级。未验证项仍为正式身份安装向导与生命周期、干净 Windows 普通账号、真实旧用户迁移及 macOS/Linux 实机安装。公网服务和真实 Agent 调用本轮未测，真实硬件不适用。
+
+新增 Windows CI 迁移运行时检查及第三种安装 fixture；实际远程结果在推送后单独记录，不能以本机通过代替。用户下一步仅需在独立测试账号/机器使用本候选执行正式 Setup 与本地示例流程，操作和预期见 [WINDOWS_ACCEPTANCE.md](WINDOWS_ACCEPTANCE.md)。真实旧库继续保留，不是本轮自动化对象。
+
+## 2026-11-04 历史候选
 
 本地正式身份候选位于 `release/candidate-20261104/`。0.1.0 x64 Setup 为 124,114,521 字节，SHA-256 为 `2ad682ed471dca008488a0aefd35e7b4ed372392cfb7fde19f73090a1ae539ed`。同目录 Portable 为 112,253,144 字节，SHA-256 为 `cb1e0b5e61ad3a9abe9964571cb4e16be5b8dfc3a716a58078dd6250a079dba7`。均未签名，仅供本地验收。
 

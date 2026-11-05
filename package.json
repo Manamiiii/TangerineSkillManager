@@ -1,6 +1,6 @@
 {
   "name": "tangerine-skill-manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "An offline-first desktop library and safe synchronization tool for AI Agent Skills",
   "license": "GPL-3.0-only",
@@ -27,6 +27,7 @@
     "dev": "npm run start",
     "preview": "vite preview",
     "test:desktop": "node scripts/desktop-smoke.mjs",
+    "test:layout": "node scripts/layout-runtime-smoke.mjs",
     "test:installer": "node scripts/windows-installer-smoke.mjs",
     "build:installer-fixtures": "node scripts/build-installer-fixtures.mjs",
     "checksums": "node scripts/checksums.mjs",

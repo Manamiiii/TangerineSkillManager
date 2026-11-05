@@ -8,7 +8,7 @@
 
 ### 数据放在哪里，会上传吗？
 
-默认库位于系统用户数据目录的 `skill-manager/vault/skills` 下。配置、来源和安装记录只在本机保存，不上传。完整路径可在界面中查看，库目录可在设置中修改。[配置及恢复说明](CONFIGURATION.md)
+Windows 新库位于 `%LOCALAPPDATA%/Tangerine/Data/TangerineSkillManager/Storage/vault/skills`，旧用户迁移后保留原库位置。macOS/Linux 仍使用系统用户数据目录的 `skill-manager/vault/skills`。配置、来源和安装记录只在本机保存，不上传。完整路径可在界面中查看，库目录可在设置中修改。[目录迁移及恢复说明](DATA_LAYOUT.md)
 
 ### copy 和 symlink 怎么选？
 

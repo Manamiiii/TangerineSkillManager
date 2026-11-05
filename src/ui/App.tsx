@@ -1062,7 +1062,7 @@ export function App() {
             <p>应用版本从 GitHub 查询，Skill 更新跟随各自来源。不会后台检查或自动安装。</p>
           </div>
         </div>
-        <p className="muted">Tangerine Skill Manager 0.1.0 · GPL-3.0-only</p>
+        <p className="muted">Tangerine Skill Manager 0.1.1 · GPL-3.0-only</p>
         <details>
           <summary>开源许可证 · GNU GPL v3.0</summary>
           <p>Copyright (c) 2026 Tangerine Skill Manager contributors.</p>
@@ -1121,7 +1121,7 @@ export function App() {
             本地运行 · 无遥测
           </div>
           <span>YOUR SKILLS. YOUR CONTROL.</span>
-          <small>v0.1.0 · 开源桌面应用</small>
+          <small>v0.1.1 · 开源桌面应用</small>
         </div>
       </aside>
       <div className="main-shell">
