@@ -98,7 +98,7 @@ Windows 新库默认位于 `%LOCALAPPDATA%/Tangerine/Data/TangerineSkillManager/
 | 配置契约与内置示例 | [config](config)、[examples](examples) |
 | 架构、数据、安装、验收说明 | [架构](ARCHITECTURE.md)、[专题文档](docs)、[安装交接](docs/WINDOWS_INSTALLER_HANDOFF.md) |
 | 单元与集成测试、桌面与安装测试 | [tests](tests)、[scripts](scripts) 下的 desktop-smoke 和 windows-installer-smoke |
-| 启动、构建和 Windows 安装策略 | [package.json](package.json)、[构建脚本](scripts)、[NSIS 规则](build/installer.nsh) |
+| 启动、构建和 Windows 安装策略 | [package.json](package.json)、[构建脚本](scripts)、[NSIS 规则](build/installer.nsh)、[桌面验收交付](docs/DESKTOP_DELIVERY.md) |
 | 图标源与派生资源 | [SVG 原稿](assets/skill-manager.svg)、[生成脚本](scripts/icons.mjs)、[PNG 与多尺寸 ICO](build) |
 | 本地生成的文件（Git 忽略） | `dist/`、`dist-desktop/` 为运行代码，`release/` 下存放候选和 `installer-acceptance/` 测试包，`test-results/` 存放验收报告与截图，`*.log` 为日志 |
 

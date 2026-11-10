@@ -53,7 +53,7 @@ npm run dist   # 当前平台的分发文件，禁止自动发布
 
 Windows 所有入口的新数据、Electron profile/cache/log/temp 均进入本项目 Data 空间。旧数据必须显式迁移，兼容路径及例外见 [目录契约](DATA_LAYOUT.md)。`npm run test:layout -- '<正式 win-unpacked EXE 路径>'` 使用虚构旧配置和 copy/junction 安装，实际检查 Electron 新旧单实例排斥、迁移和重开恢复。Windows CI 同样执行该检查。
 
-源码入口 `npm start` 在仓库根目录先构建再执行 `electron .`，`npm run dev` 调用同一入口。产品加载包内界面，无开发服务器端口。Portable 封装器向主程序传递原参数，正式启动使用默认当前用户配置及单实例锁。调试端口和测试 profile 仅用于验收。仓库不含桌面启动器生成任务。保留现有启动命令和便携文件供过渡，新的候选可以构建到独立目录。
+源码入口 `npm start` 在仓库根目录先构建再执行 `electron .`，`npm run dev` 调用同一入口。产品加载包内界面，无开发服务器端口。Portable 封装器向主程序传递原参数，正式启动使用默认当前用户配置及单实例锁。调试端口和测试 profile 仅用于验收。固定桌面入口不随源码更新；按 [桌面交付步骤](DESKTOP_DELIVERY.md) 核对并维护，遇到旧实例或迁移阻塞时保留原目标并说明。保留现有启动命令和便携文件供过渡，新的候选可以构建到独立目录。
 
 `npm run icons` 从本仓库的 SVG 原稿生成 PNG 和 ICO。图稿独立绘制，橙色圆角底、果实轮廓和绿叶延续 Tangerine 系列，中央叠层代表 Skill 库。构建使用已提交的派生文件。要检查 Windows 成品，可将主程序、Setup 和 Portable 的 EXE 路径作为参数传给 `node scripts/audit-icons.mjs`，核对 PE 图标资源各尺寸与 ICO 一致。
 
